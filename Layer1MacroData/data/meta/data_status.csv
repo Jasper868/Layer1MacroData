@@ -1,0 +1,27 @@
+﻿数据源,代码,指标名称,缓存文件,本地更新前有效行数,本地更新前最新日期,是否尝试远程更新,远程请求起始日期,远程返回有效行数,状态,本地更新后有效行数,本地更新后最新日期,备注,运行时间
+FRED,VIXCLS,标普500波动率,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5064,2026-06-16,否,,0,跳过远程_mode_off,5064,2026-06-16,,2026-06-19 17:56:08
+FRED,VXNCLS,纳指100波动率,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5036,2026-06-16,否,,0,跳过远程_mode_off,5036,2026-06-16,,2026-06-19 17:56:08
+FRED,VXDCLS,道琼斯波动率,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5037,2026-06-16,否,,0,跳过远程_mode_off,5037,2026-06-16,,2026-06-19 17:56:08
+FRED,RVXCLS,罗素2000波动率,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5034,2026-06-16,否,,0,跳过远程_mode_off,5034,2026-06-16,,2026-06-19 17:56:08
+FRED,BAMLH0A0HYM2,高收益债利差,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,791,2026-06-16,否,,0,跳过远程_mode_off,791,2026-06-16,,2026-06-19 17:56:08
+FRED,DGS10,美国10Y收益率,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5006,2026-06-15,否,,0,跳过远程_mode_off,5006,2026-06-15,,2026-06-19 17:56:08
+FRED,DFII10,美国10Y实际利率,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5006,2026-06-15,否,,0,跳过远程_mode_off,5006,2026-06-15,,2026-06-19 17:56:08
+FRED,T10YIE,10Y通胀预期,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5007,2026-06-16,否,,0,跳过远程_mode_off,5007,2026-06-16,,2026-06-19 17:56:08
+FRED,DTWEXBGS,广义美元指数,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5010,2026-06-12,否,,0,跳过远程_mode_off,5010,2026-06-12,,2026-06-19 17:56:08
+FRED,DEXCHUS,USD_CNY,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5011,2026-06-12,否,,0,跳过远程_mode_off,5011,2026-06-12,,2026-06-19 17:56:08
+FRED,DEXUSEU,EUR_USD,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5011,2026-06-12,否,,0,跳过远程_mode_off,5011,2026-06-12,,2026-06-19 17:56:08
+FRED,DEXJPUS,JPY_USD,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5011,2026-06-12,否,,0,跳过远程_mode_off,5011,2026-06-12,,2026-06-19 17:56:08
+FRED,DCOILWTICO,WTI原油,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5016,2026-06-08,否,,0,跳过远程_mode_off,5016,2026-06-08,,2026-06-19 17:56:08
+FRED,DGS3MO,美国3M国债收益率_现金代理,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,5006,2026-06-15,否,,0,跳过远程_mode_off,5006,2026-06-15,,2026-06-19 17:56:08
+yfinance,GC=F,黄金期货,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,5034,2026-06-17,否,,0,跳过远程_mode_off,5034,2026-06-17,,2026-06-19 17:56:08
+yfinance,GLD,GLD_黄金代理,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,5034,2026-06-16,否,,0,跳过远程_mode_off,5034,2026-06-16,,2026-06-19 17:56:08
+yfinance,SPY,SPY_标普500代理,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,5034,2026-06-16,否,,0,跳过远程_mode_off,5034,2026-06-16,,2026-06-19 17:56:08
+yfinance,QQQ,QQQ_纳指100代理,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,5034,2026-06-16,否,,0,跳过远程_mode_off,5034,2026-06-16,,2026-06-19 17:56:08
+yfinance,DIA,DIA_道琼斯代理,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,5034,2026-06-16,否,,0,跳过远程_mode_off,5034,2026-06-16,,2026-06-19 17:56:08
+yfinance,IWM,IWM_罗素2000代理,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,5034,2026-06-16,否,,0,跳过远程_mode_off,5034,2026-06-16,,2026-06-19 17:56:08
+yfinance,TLT,TLT_长债代理,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,5034,2026-06-16,否,,0,跳过远程_mode_off,5034,2026-06-16,,2026-06-19 17:56:08
+yfinance,ACWI,ACWI_全球股票代理,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,4584,2026-06-16,否,,0,跳过远程_mode_off,4584,2026-06-16,,2026-06-19 17:56:08
+yfinance,^VIX9D,VIX9D_9日波动率,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,3884,2026-06-12,否,,0,跳过远程_mode_off,3884,2026-06-12,,2026-06-19 17:56:08
+yfinance,^VIX3M,VIX3M_3个月波动率,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,5009,2026-06-12,否,,0,跳过远程_mode_off,5009,2026-06-12,,2026-06-19 17:56:08
+yfinance,^VIX6M,VIX6M_6个月波动率,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,4641,2026-06-12,否,,0,跳过远程_mode_off,4641,2026-06-12,,2026-06-19 17:56:08
+yfinance,^SKEW,SKEW_尾部风险指数,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,4971,2026-06-16,否,,0,跳过远程_mode_off,4971,2026-06-16,,2026-06-19 17:56:08
