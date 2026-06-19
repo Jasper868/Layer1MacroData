@@ -1,0 +1,11 @@
+﻿文件名称,路径,是否存在,大小MiB
+PCR缓存,cboe_pcr_cache.csv,是,0.0665
+成交量缓存,cboe_pcr_volume_cache.csv,是,0.3845
+验证缓存,cboe_pcr_validation_cache.csv,是,2.5501
+本轮状态,cboe_pcr_status_latest_run.csv,是,0.0003
+本轮验证,cboe_pcr_validation_latest_run.csv,是,0.0002
+缺失值统计,cboe_pcr_missing_value_report.csv,是,0.0007
+最新快照,cboe_pcr_latest_snapshot.csv,是,0.0014
+年度覆盖率,cboe_pcr_yearly_coverage.csv,是,0.0009
+验证汇总,cboe_pcr_validation_summary.csv,是,0.0005
+指标字典,cboe_pcr_dictionary.csv,是,0.0021

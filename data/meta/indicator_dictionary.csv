@@ -1,0 +1,27 @@
+﻿数据源,代码,指标名称,数据类型,说明
+FRED,VIXCLS,标普500波动率,宏观/市场指标,
+FRED,VXNCLS,纳指100波动率,宏观/市场指标,
+FRED,VXDCLS,道琼斯波动率,宏观/市场指标,
+FRED,RVXCLS,罗素2000波动率,宏观/市场指标,
+FRED,BAMLH0A0HYM2,高收益债利差,宏观/市场指标,
+FRED,DGS10,美国10Y收益率,宏观/市场指标,
+FRED,DFII10,美国10Y实际利率,宏观/市场指标,
+FRED,T10YIE,10Y通胀预期,宏观/市场指标,
+FRED,DTWEXBGS,广义美元指数,宏观/市场指标,
+FRED,DEXCHUS,USD_CNY,宏观/市场指标,
+FRED,DEXUSEU,EUR_USD,宏观/市场指标,
+FRED,DEXJPUS,JPY_USD,宏观/市场指标,
+FRED,DCOILWTICO,WTI原油,宏观/市场指标,
+FRED,DGS3MO,美国3M国债收益率_现金代理,三资产组合/现金代理,用于防御金字塔现金腿日收益近似：DGS3MO / 100 / 252。
+yfinance,GC=F,黄金期货,ETF/期货价格代理,
+yfinance,GLD,GLD_黄金代理,ETF/期货价格代理,
+yfinance,SPY,SPY_标普500代理,ETF/期货价格代理,
+yfinance,QQQ,QQQ_纳指100代理,ETF/期货价格代理,
+yfinance,DIA,DIA_道琼斯代理,ETF/期货价格代理,
+yfinance,IWM,IWM_罗素2000代理,ETF/期货价格代理,
+yfinance,TLT,TLT_长债代理,ETF/期货价格代理,
+yfinance,ACWI,ACWI_全球股票代理,ETF/期货价格代理,
+yfinance,^VIX9D,VIX9D_9日波动率,波动率期限结构,Cboe 9-Day Volatility Index；用于观察短端恐慌。
+yfinance,^VIX3M,VIX3M_3个月波动率,波动率期限结构,Cboe 3-Month Volatility Index；用于与VIXCLS构建期限结构。
+yfinance,^VIX6M,VIX6M_6个月波动率,波动率期限结构,Cboe 6-Month Volatility Index；用于观察中端压力。
+yfinance,^SKEW,SKEW_尾部风险指数,尾部风险定价,Cboe SKEW Index；仅作为尾部风险辅助指标，不单独触发调仓。

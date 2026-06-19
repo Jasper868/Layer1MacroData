@@ -1,0 +1,2 @@
+﻿网页原始名称,PCR列名,source_regime,url,本地文件,行数,最早日期,最晚日期,有效PCR数量,错误,备注
+不使用 2019-10-04 以前 bulk CSV,,daily_page_only_after_2019_10_07,https://www.cboe.com/markets/us/options/market-statistics/daily/,,0,2019-10-07,,,,本版本只使用 2019-10-07 之后的 Cboe Daily Market Statistics；不再抓取 2006-2019 bulk CSV。
