@@ -1,0 +1,45 @@
+# Secrets and local machine configuration
+.env
+.env.*
+!.env.example
+
+# Python environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local-only generated files
+data/output/
+data/archive/
+output/
+archive/
+*.xlsx
+*.xls
+*.xlsm
+*.parquet
+*.feather
+*.pkl
+*.pickle
+*.html
+*.htm
+*.log
+
+# Research output does not belong in the data repository
+data/features/
+data/scores/
+data/research/
+
+# Large or transient Cboe source artifacts
+data/raw/cboe_html/
+data/raw/cboe_bulk_csv/
+**/cboe_html/
+**/cboe_bulk_csv/
