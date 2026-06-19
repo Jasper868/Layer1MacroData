@@ -32,6 +32,7 @@ FRED_CACHE_PATH = RAW_DIR / "fred_cache.csv"
 YAHOO_CACHE_PATH = RAW_DIR / "yahoo_cache.csv"
 
 INDICATOR_DICTIONARY_PATH = META_DIR / "indicator_dictionary.csv"
+SOURCE_METADATA_PATH = META_DIR / "source_metadata.csv"
 DATA_STATUS_PATH = META_DIR / "data_status.csv"
 MISSING_VALUE_REPORT_PATH = META_DIR / "missing_value_report.csv"
 FILE_SIZE_REPORT_PATH = META_DIR / "file_size_report.csv"
@@ -39,11 +40,35 @@ FILE_SIZE_REPORT_PATH = META_DIR / "file_size_report.csv"
 
 @dataclass(frozen=True)
 class IndicatorSpec:
+    """One raw source series plus its prospective-use metadata.
+
+    The metadata is an operational data contract, not a signal rule. It documents
+    how a series may later be aligned in research without silently treating stale
+    or not-yet-published observations as contemporaneously available.
+    """
+
     source: str
     code: str
     name: str
     data_type: str
     note: str = ""
+    observation_frequency: str = "daily"
+    update_frequency: str = "daily"
+    availability_rule: str = (
+        "Use only after the source/vendor has published the observation; "
+        "never backdate a value into an earlier decision session."
+    )
+    conservative_availability_lag_calendar_days: int = 2
+    revision_policy: str = (
+        "Source values may be revised. This Data repository stores the latest retrieved "
+        "history and does not yet store full vintage panels."
+    )
+    maximum_expected_tail_delay_calendar_days: int = 7
+    prospective_alignment: str = (
+        "Research must use values only after their declared availability; "
+        "do not forward-fill before availability."
+    )
+    v1_admission_note: str = "Metadata only; no portfolio action."
 
 
 FRED_SPECS: list[IndicatorSpec] = [
@@ -51,7 +76,39 @@ FRED_SPECS: list[IndicatorSpec] = [
     IndicatorSpec("FRED", "VXNCLS", "纳指100波动率", "宏观/市场指标"),
     IndicatorSpec("FRED", "VXDCLS", "道琼斯波动率", "宏观/市场指标"),
     IndicatorSpec("FRED", "RVXCLS", "罗素2000波动率", "宏观/市场指标"),
-    IndicatorSpec("FRED", "BAMLH0A0HYM2", "高收益债利差", "宏观/市场指标"),
+    IndicatorSpec(
+        "FRED",
+        "BAMLH0A0HYM2",
+        "高收益债利差",
+        "宏观/市场指标",
+        "ICE BofA US High Yield OAS. Retain as a short-history descriptive series only; "
+        "do not splice it to another proxy or use it as a sole crisis trigger.",
+        v1_admission_note=(
+            "LIMITED_HISTORY_DESCRIPTIVE_ONLY. It remains separate from the long-history "
+            "Baa proxy and cannot establish long-cycle robustness."
+        ),
+    ),
+    IndicatorSpec(
+        "FRED",
+        "BAA10Y",
+        "美国Baa公司债利差_10Y",
+        "宏观/市场指标",
+        "Moody's seasoned Baa corporate-yield spread versus the 10-year Treasury. "
+        "This is a long-history broad credit-spread proxy, not a high-yield OAS substitute "
+        "and never a splice for the ICE high-yield series.",
+        observation_frequency="daily",
+        update_frequency="daily source release",
+        availability_rule=(
+            "Use only after the FRED/H.15 release is available. Apply a conservative "
+            "two-calendar-day availability lag until a later vintage/as-of layer is implemented."
+        ),
+        conservative_availability_lag_calendar_days=2,
+        maximum_expected_tail_delay_calendar_days=10,
+        v1_admission_note=(
+            "ADMISSION_CANDIDATE_FOR_V1_LONG_HISTORY_CREDIT_CONTEXT_ONLY. "
+            "No V0 component, threshold, or portfolio action may use it."
+        ),
+    ),
     IndicatorSpec("FRED", "DGS10", "美国10Y收益率", "宏观/市场指标"),
     IndicatorSpec("FRED", "DFII10", "美国10Y实际利率", "宏观/市场指标"),
     IndicatorSpec("FRED", "T10YIE", "10Y通胀预期", "宏观/市场指标"),
@@ -60,7 +117,13 @@ FRED_SPECS: list[IndicatorSpec] = [
     IndicatorSpec("FRED", "DEXUSEU", "EUR_USD", "宏观/市场指标"),
     IndicatorSpec("FRED", "DEXJPUS", "JPY_USD", "宏观/市场指标"),
     IndicatorSpec("FRED", "DCOILWTICO", "WTI原油", "宏观/市场指标"),
-    IndicatorSpec("FRED", "DGS3MO", "美国3M国债收益率_现金代理", "三资产组合/现金代理", "用于防御金字塔现金腿日收益近似：DGS3MO / 100 / 252。"),
+    IndicatorSpec(
+        "FRED",
+        "DGS3MO",
+        "美国3M国债收益率_现金代理",
+        "三资产组合/现金代理",
+        "用于防御金字塔现金腿日收益近似：DGS3MO / 100 / 252。",
+    ),
 ]
 
 YAHOO_SPECS: list[IndicatorSpec] = [
@@ -72,13 +135,67 @@ YAHOO_SPECS: list[IndicatorSpec] = [
     IndicatorSpec("yfinance", "IWM", "IWM_罗素2000代理", "ETF/期货价格代理"),
     IndicatorSpec("yfinance", "TLT", "TLT_长债代理", "ETF/期货价格代理"),
     IndicatorSpec("yfinance", "ACWI", "ACWI_全球股票代理", "ETF/期货价格代理"),
-    IndicatorSpec("yfinance", "^VIX9D", "VIX9D_9日波动率", "波动率期限结构", "Cboe 9-Day Volatility Index；用于观察短端恐慌。"),
-    IndicatorSpec("yfinance", "^VIX3M", "VIX3M_3个月波动率", "波动率期限结构", "Cboe 3-Month Volatility Index；用于与VIXCLS构建期限结构。"),
-    IndicatorSpec("yfinance", "^VIX6M", "VIX6M_6个月波动率", "波动率期限结构", "Cboe 6-Month Volatility Index；用于观察中端压力。"),
-    IndicatorSpec("yfinance", "^SKEW", "SKEW_尾部风险指数", "尾部风险定价", "Cboe SKEW Index；仅作为尾部风险辅助指标，不单独触发调仓。"),
+    IndicatorSpec(
+        "yfinance",
+        "^VIX9D",
+        "VIX9D_9日波动率",
+        "波动率期限结构",
+        "Cboe 9-Day Volatility Index；用于观察短端恐慌。",
+    ),
+    IndicatorSpec(
+        "yfinance",
+        "^VIX3M",
+        "VIX3M_3个月波动率",
+        "波动率期限结构",
+        "Cboe 3-Month Volatility Index；用于与VIXCLS构建期限结构。",
+    ),
+    IndicatorSpec(
+        "yfinance",
+        "^VIX6M",
+        "VIX6M_6个月波动率",
+        "波动率期限结构",
+        "Cboe 6-Month Volatility Index；用于观察中端压力。",
+    ),
+    IndicatorSpec(
+        "yfinance",
+        "^SKEW",
+        "SKEW_尾部风险指数",
+        "尾部风险定价",
+        "Cboe SKEW Index；仅作为尾部风险辅助指标，不单独触发调仓。",
+    ),
+]
+
+# Cboe PCR values are produced by the separate Cboe updater. They are included
+# here solely so source metadata covers every column in combined_macro_market.csv.
+CBOE_SOURCE_METADATA_SPECS: list[IndicatorSpec] = [
+    IndicatorSpec(
+        "Cboe",
+        code,
+        name,
+        "期权成交量 Put/Call 比",
+        "Cboe daily PCR series. Keep as descriptive options-positioning context only.",
+        observation_frequency="daily",
+        update_frequency="daily after market close",
+        availability_rule=(
+            "Use only after Cboe's end-of-day publication and the local validation step. "
+            "Never infer a same-day intraday value."
+        ),
+        conservative_availability_lag_calendar_days=2,
+        maximum_expected_tail_delay_calendar_days=10,
+        v1_admission_note="LIMITED_HISTORY_DESCRIPTIVE_ONLY; no sole trigger or portfolio action.",
+    )
+    for code, name in [
+        ("TOTAL_PCR", "CBOE_Total_PCR"),
+        ("INDEX_PCR", "CBOE_Index_PCR"),
+        ("ETP_PCR", "CBOE_ETP_PCR"),
+        ("EQUITY_PCR", "CBOE_Equity_PCR"),
+        ("VIX_PCR", "CBOE_VIX_PCR"),
+        ("SPX_PCR", "CBOE_SPX_PCR"),
+    ]
 ]
 
 ALL_SPECS: list[IndicatorSpec] = FRED_SPECS + YAHOO_SPECS
+SOURCE_METADATA_SPECS: list[IndicatorSpec] = ALL_SPECS + CBOE_SOURCE_METADATA_SPECS
 
 
 # -----------------------------------------------------------------------------
@@ -103,15 +220,32 @@ def _as_date_str(value: str | pd.Timestamp | None) -> str | None:
     return ts.strftime("%Y-%m-%d")
 
 
-def _start_from_cache(cache: pd.DataFrame, *, default_start: str, lookback_days: int) -> str:
+def _start_from_cache(
+    cache: pd.DataFrame,
+    *,
+    default_start: str,
+    lookback_days: int,
+    column: str | None = None,
+) -> str:
+    """Return a safe per-series incremental start date.
+
+    A newly admitted series may have no history in an otherwise current wide
+    cache. In that case it must request from ``default_start`` rather than
+    inheriting the latest date of unrelated columns.
+    """
     if cache.empty or "date" not in cache.columns:
         return default_start
 
-    dates = pd.to_datetime(cache["date"], errors="coerce").dropna()
-    if dates.empty:
+    columns = ["date"] if column is None or column not in cache.columns else ["date", column]
+    work = cache.loc[:, columns].copy()
+    work["date"] = pd.to_datetime(work["date"], errors="coerce")
+    work = work.dropna(subset=["date"])
+    if column is not None and column in work.columns:
+        work = work.dropna(subset=[column])
+    if work.empty:
         return default_start
 
-    latest = dates.max()
+    latest = pd.Timestamp(work["date"].max())
     start = latest - pd.Timedelta(days=lookback_days)
     return start.strftime("%Y-%m-%d")
 
@@ -339,11 +473,20 @@ def update_fred_cache(
             ))
         return cache, status_rows
 
-    request_start = start_date if mode == "full" else _start_from_cache(cache, default_start=start_date, lookback_days=lookback_days)
-    print(f"[FRED] 请求区间：{request_start} 至 {end_date}")
+    print(f"[FRED] 目标结束日期：{end_date}")
 
     for idx, spec in enumerate(FRED_SPECS, start=1):
-        print(f"[FRED {idx}/{len(FRED_SPECS)}] {spec.code} -> {spec.name}")
+        request_start = (
+            start_date
+            if mode == "full"
+            else _start_from_cache(
+                cache,
+                default_start=start_date,
+                lookback_days=lookback_days,
+                column=spec.name,
+            )
+        )
+        print(f"[FRED {idx}/{len(FRED_SPECS)}] {spec.code} -> {spec.name}; 请求区间：{request_start} 至 {end_date}")
         spec_before = cache.copy()
         try:
             update = fetch_fred_series(spec, request_start, end_date)
@@ -468,11 +611,20 @@ def update_yahoo_cache(
             ))
         return cache, status_rows
 
-    request_start = start_date if mode == "full" else _start_from_cache(cache, default_start=start_date, lookback_days=lookback_days)
-    print(f"[Yahoo] 请求区间：{request_start} 至 {end_date}")
+    print(f"[Yahoo] 目标结束日期：{end_date}")
 
     for idx, spec in enumerate(YAHOO_SPECS, start=1):
-        print(f"[Yahoo {idx}/{len(YAHOO_SPECS)}] {spec.code} -> {spec.name}")
+        request_start = (
+            start_date
+            if mode == "full"
+            else _start_from_cache(
+                cache,
+                default_start=start_date,
+                lookback_days=lookback_days,
+                column=spec.name,
+            )
+        )
+        print(f"[Yahoo {idx}/{len(YAHOO_SPECS)}] {spec.code} -> {spec.name}; 请求区间：{request_start} 至 {end_date}")
         spec_before = cache.copy()
         try:
             update = fetch_yahoo_series(spec, request_start, end_date)
@@ -528,6 +680,33 @@ def build_indicator_dictionary() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def build_source_metadata() -> pd.DataFrame:
+    """Build the machine-readable source/provenance contract for every raw input."""
+    rows = [
+        {
+            "source": spec.source,
+            "code": spec.code,
+            "indicator_name": spec.name,
+            "data_type": spec.data_type,
+            "observation_frequency": spec.observation_frequency,
+            "update_frequency": spec.update_frequency,
+            "availability_rule": spec.availability_rule,
+            "conservative_availability_lag_calendar_days": (
+                spec.conservative_availability_lag_calendar_days
+            ),
+            "revision_policy": spec.revision_policy,
+            "maximum_expected_tail_delay_calendar_days": (
+                spec.maximum_expected_tail_delay_calendar_days
+            ),
+            "prospective_alignment": spec.prospective_alignment,
+            "v1_admission_note": spec.v1_admission_note,
+            "notes": spec.note,
+        }
+        for spec in SOURCE_METADATA_SPECS
+    ]
+    return pd.DataFrame(rows).sort_values(["source", "indicator_name"]).reset_index(drop=True)
+
+
 def build_fred_yahoo_missing_report(fred: pd.DataFrame, yahoo: pd.DataFrame) -> pd.DataFrame:
     fred_report = build_missing_value_report(fred)
     if not fred_report.empty:
@@ -552,6 +731,9 @@ def write_fred_yahoo_outputs(
     indicator_dict = build_indicator_dictionary()
     safe_write_csv(indicator_dict, INDICATOR_DICTIONARY_PATH)
 
+    source_metadata = build_source_metadata()
+    safe_write_csv(source_metadata, SOURCE_METADATA_PATH)
+
     status = pd.DataFrame(status_rows)
     safe_write_csv(status, DATA_STATUS_PATH)
 
@@ -562,6 +744,7 @@ def write_fred_yahoo_outputs(
         "fred_cache": FRED_CACHE_PATH,
         "yahoo_cache": YAHOO_CACHE_PATH,
         "indicator_dictionary": INDICATOR_DICTIONARY_PATH,
+        "source_metadata": SOURCE_METADATA_PATH,
         "data_status": DATA_STATUS_PATH,
         "missing_value_report": MISSING_VALUE_REPORT_PATH,
     })

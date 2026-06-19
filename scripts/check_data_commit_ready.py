@@ -32,6 +32,7 @@ REQUIRED_FILES = (
     META_DIR / "data_quality_indicator_report.csv",
     META_DIR / "data_quality_alerts.csv",
     META_DIR / "combined_missing_value_report.csv",
+    META_DIR / "source_metadata.csv",
 )
 
 FORBIDDEN_PREFIXES = (
@@ -58,6 +59,12 @@ def run_git(args: list[str]) -> subprocess.CompletedProcess[str]:
         capture_output=True,
         check=False,
     )
+
+
+def is_forbidden_tracked_secret(path: str) -> bool:
+    normalized = path.replace("\\", "/").strip()
+    name = Path(normalized).name
+    return name == ".env" or (name.startswith(".env.") and name != ".env.example")
 
 
 def main() -> None:
@@ -88,6 +95,14 @@ def main() -> None:
     for name in tracked_files:
         if name.startswith(FORBIDDEN_PREFIXES) or Path(name).name in FORBIDDEN_NAMES:
             errors.append(f"Research-only content is still tracked: {name}")
+
+    print("\n[Secret tracking exclusion]")
+    for name in tracked_files:
+        if is_forbidden_tracked_secret(name):
+            errors.append(
+                f"Local secret/config file is still tracked: {name}. "
+                "Rotate any value it contained, then remove it with `git rm --cached .env`."
+            )
 
     if errors:
         print("\nRESULT: FAIL")

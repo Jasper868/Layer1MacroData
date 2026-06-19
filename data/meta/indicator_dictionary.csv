@@ -3,7 +3,8 @@ FRED,VIXCLS,标普500波动率,宏观/市场指标,
 FRED,VXNCLS,纳指100波动率,宏观/市场指标,
 FRED,VXDCLS,道琼斯波动率,宏观/市场指标,
 FRED,RVXCLS,罗素2000波动率,宏观/市场指标,
-FRED,BAMLH0A0HYM2,高收益债利差,宏观/市场指标,
+FRED,BAMLH0A0HYM2,高收益债利差,宏观/市场指标,ICE BofA US High Yield OAS. Retain as a short-history descriptive series only; do not splice it to another proxy or use it as a sole crisis trigger.
+FRED,BAA10Y,美国Baa公司债利差_10Y,宏观/市场指标,"Moody's seasoned Baa corporate-yield spread versus the 10-year Treasury. This is a long-history broad credit-spread proxy, not a high-yield OAS substitute and never a splice for the ICE high-yield series."
 FRED,DGS10,美国10Y收益率,宏观/市场指标,
 FRED,DFII10,美国10Y实际利率,宏观/市场指标,
 FRED,T10YIE,10Y通胀预期,宏观/市场指标,

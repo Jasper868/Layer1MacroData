@@ -100,6 +100,8 @@ INDICATOR_POLICY_OVERRIDES: dict[str, QualityPolicy] = {
     "美国10Y实际利率": QualityPolicy(7, 21, 45, 0.45, 0.20, min_value=-10, max_value=15),
     "10Y通胀预期": QualityPolicy(7, 21, 45, 0.45, 0.20, min_value=-5, max_value=15),
     "高收益债利差": QualityPolicy(7, 21, 45, 0.45, 0.20, min_value=0, max_value=50),
+    # V1 daily broad-credit proxy. This is not the same series as high-yield OAS.
+    "美国Baa公司债利差_10Y": QualityPolicy(10, 21, 45, 0.45, 0.20, min_value=-5, max_value=25),
     # FX. FRED exchange-rate series can publish with visible lags, so warn/fail
     # windows are intentionally wider than yfinance market-price proxies.
     "USD_CNY": QualityPolicy(10, 30, 60, 0.30, 0.10, min_value=4, max_value=10),
