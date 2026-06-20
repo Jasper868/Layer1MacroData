@@ -60,17 +60,24 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    fred_mode = "off" if args.offline else args.fred_yahoo_mode
-    cboe_mode = "off" if args.offline else args.cboe_mode
-    if cboe_mode == "full":
-        cboe_mode = "force"
+    if args.offline:
+        # A rebuild uses Git-synced caches only. Do not run source updaters in
+        # off mode: they would overwrite the last online acquisition reports
+        # with “not attempted” rows and blur the provenance boundary.
+        print(
+            "[INFO] 离线重建：保留上一次在线抓取状态；"
+            "不运行 FRED/yfinance/Cboe 取数脚本。"
+        )
+    else:
+        fred_mode = args.fred_yahoo_mode
+        cboe_mode = "force" if args.cboe_mode == "full" else args.cboe_mode
 
-    run_command([sys.executable, "scripts/run_fred_yahoo.py", "--mode", fred_mode])
+        run_command([sys.executable, "scripts/run_fred_yahoo.py", "--mode", fred_mode])
 
-    cboe_command = [sys.executable, "scripts/run_cboe_pcr.py", "--mode", cboe_mode]
-    if not args.with_excel:
-        cboe_command.append("--no-excel")
-    run_command(cboe_command)
+        cboe_command = [sys.executable, "scripts/run_cboe_pcr.py", "--mode", cboe_mode]
+        if not args.with_excel:
+            cboe_command.append("--no-excel")
+        run_command(cboe_command)
 
     run_command([sys.executable, "scripts/run_build_combined.py"])
 

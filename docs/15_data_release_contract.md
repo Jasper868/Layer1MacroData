@@ -42,6 +42,15 @@ before publishing. `FAIL` means do not publish.
    denominator is accepted only when range and total-volume checks pass.
 4. The quality gate is not `FAIL`.
 5. Every formal handoff file still matches its manifest SHA-256 checksum.
+6. The Cboe validation cache is itself part of the manifest, so accepted PCR
+   observations retain their validation evidence.
+
+## Offline rebuild rule
+
+`python scripts/run_data_update.py --offline` rebuilds the combined handoff from
+existing caches only. It deliberately does not run the FRED/yfinance or Cboe
+source updaters in `off` mode, because doing so would overwrite the previous
+online acquisition reports with a misleading “not attempted” status.
 
 ## Interpretation boundary
 

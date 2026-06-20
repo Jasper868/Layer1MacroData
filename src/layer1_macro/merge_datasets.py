@@ -78,9 +78,13 @@ def merge_sources(dfs: list[pd.DataFrame]) -> pd.DataFrame:
         overlap = set(combined.columns).intersection(set(right.columns)) - {"date"}
 
         if overlap:
-            rename_map = {col: f"{col}_dup" for col in overlap}
-            print(f"[提醒] 发现重复字段，右表自动加 _dup 后缀：{sorted(overlap)}")
-            right = right.rename(columns=rename_map)
+            # Duplicate names mean the source contract has become ambiguous.
+            # Never create an automatic ``_dup`` column: Research could then
+            # unknowingly consume the wrong series.
+            raise ValueError(
+                "数据源字段重复，已停止合并。请明确修改指标名称或来源映射："
+                f"{sorted(overlap)}"
+            )
 
         combined = combined.merge(right, on="date", how="outer")
 

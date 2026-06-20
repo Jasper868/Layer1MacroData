@@ -20,6 +20,7 @@ RELEASE_FILES: tuple[Path, ...] = (
     RAW_DIR / "yahoo_cache.csv",
     RAW_DIR / "cboe_pcr_cache.csv",
     RAW_DIR / "cboe_pcr_volume_cache.csv",
+    META_DIR / "cboe_pcr_validation_cache.csv",
     PROCESSED_DIR / "combined_macro_market.csv",
     PROCESSED_DIR / "latest_macro_snapshot.csv",
     PROCESSED_DIR / "cboe_pcr_latest_snapshot.csv",
