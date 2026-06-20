@@ -69,6 +69,8 @@ def run_post_merge_checks(args: argparse.Namespace) -> None:
         return
 
     run_command([sys.executable, "scripts/run_data_quality.py"])
+    run_command([sys.executable, "scripts/run_build_research_availability_contract.py"])
+    run_command([sys.executable, "scripts/check_research_availability_contract.py"])
     run_command([sys.executable, "scripts/run_build_release_manifest.py"])
     run_command([sys.executable, "scripts/check_data_release_ready.py"])
 

@@ -1,4 +1,4 @@
 ﻿generated_at,scope,indicator,source,status,problem_type,message
-2026-06-21 01:53:33,indicator,VIX3M_3个月波动率,yfinance,WARN,stale_latest_date,最新有效日期滞后 7 天；WARN>5，FAIL>10。 | 近端覆盖率正常。
-2026-06-21 01:53:33,indicator,VIX6M_6个月波动率,yfinance,WARN,stale_latest_date,最新有效日期滞后 7 天；WARN>5，FAIL>10。 | 近端覆盖率正常。
-2026-06-21 01:53:33,indicator,VIX9D_9日波动率,yfinance,WARN,stale_latest_date,最新有效日期滞后 7 天；WARN>5，FAIL>10。 | 近端覆盖率正常。
+2026-06-21 02:05:34,indicator,VIX3M_3个月波动率,yfinance,WARN,stale_latest_date,最新有效日期滞后 7 天；WARN>5，FAIL>10。 | 近端覆盖率正常。
+2026-06-21 02:05:34,indicator,VIX6M_6个月波动率,yfinance,WARN,stale_latest_date,最新有效日期滞后 7 天；WARN>5，FAIL>10。 | 近端覆盖率正常。
+2026-06-21 02:05:34,indicator,VIX9D_9日波动率,yfinance,WARN,stale_latest_date,最新有效日期滞后 7 天；WARN>5，FAIL>10。 | 近端覆盖率正常。

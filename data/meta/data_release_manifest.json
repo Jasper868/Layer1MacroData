@@ -1,6 +1,6 @@
 {
-  "manifest_schema_version": 1,
-  "generated_at_utc": "2026-06-20T17:53:34+00:00",
+  "manifest_schema_version": 2,
+  "generated_at_utc": "2026-06-20T18:05:39+00:00",
   "release_scope": "Layer1MacroData stable Data-to-Research handoff",
   "combined_macro_market": {
     "relative_path": "processed/combined_macro_market.csv",
@@ -99,7 +99,7 @@
       "relative_path": "meta/data_quality_summary.csv",
       "exists": true,
       "size_bytes": 979,
-      "sha256": "9d44a3e159a9b90f966398bd6adb4a2de8a115912cbe90361ea746fa26396135",
+      "sha256": "589f6039b0eb5a44e0dc8788a5ed0cf8f1b2ef8abef11734ac1ddcb2c1e38dbc",
       "row_count": 10,
       "column_count": 6
     },
@@ -107,7 +107,7 @@
       "relative_path": "meta/data_quality_indicator_report.csv",
       "exists": true,
       "size_bytes": 7606,
-      "sha256": "52273f0cc82f42a29e00a5e80be1a62f983053080146f510702eb45ede9e3bab",
+      "sha256": "79574cf5c6c58ca8945b4cdd82e7d5631b0afec4170d0263f22786c5c8253a23",
       "row_count": 33,
       "column_count": 24
     },
@@ -115,10 +115,26 @@
       "relative_path": "meta/data_quality_alerts.csv",
       "exists": true,
       "size_bytes": 563,
-      "sha256": "edfff0132ca2de7e89b0bdb5394beab47e593e1d6174060612b5a2b5af9cd12a",
+      "sha256": "748039b8d51fba06947851946829545bb4ac1d3e919c9c220f03cbcd4a66ed64",
       "row_count": 3,
       "column_count": 7
+    },
+    {
+      "relative_path": "meta/research_availability_contract.csv",
+      "exists": true,
+      "size_bytes": 19007,
+      "sha256": "1a8bda07b00a7690870e60ad6c26aea876e948833978ed0c86ab8e354e7b9eda",
+      "row_count": 33,
+      "column_count": 16
+    },
+    {
+      "relative_path": "meta/research_module_readiness.csv",
+      "exists": true,
+      "size_bytes": 1084,
+      "sha256": "979686a1f0cce3c82e56e50a151dd04c3048547c638067874abc866e945eb8c3",
+      "row_count": 7,
+      "column_count": 11
     }
   ],
-  "interpretation": "Hashes identify the exact stable data inputs. This manifest is provenance metadata only and must not be interpreted as a market signal or action."
+  "interpretation": "Hashes identify the exact stable data inputs and the machine-readable research-availability contract. This manifest is provenance metadata only and must not be interpreted as a market signal or action."
 }

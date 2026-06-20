@@ -28,6 +28,8 @@ RELEASE_FILES: tuple[Path, ...] = (
     META_DIR / "data_quality_summary.csv",
     META_DIR / "data_quality_indicator_report.csv",
     META_DIR / "data_quality_alerts.csv",
+    META_DIR / "research_availability_contract.csv",
+    META_DIR / "research_module_readiness.csv",
 )
 
 
@@ -98,7 +100,7 @@ def build_data_release_manifest() -> dict[str, object]:
     combined_start, combined_end = _date_bounds(combined)
 
     manifest: dict[str, object] = {
-        "manifest_schema_version": 1,
+        "manifest_schema_version": 2,
         "generated_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "release_scope": "Layer1MacroData stable Data-to-Research handoff",
         "combined_macro_market": {
@@ -111,8 +113,9 @@ def build_data_release_manifest() -> dict[str, object]:
         "overall_data_quality_status": _overall_quality_status(),
         "files": records,
         "interpretation": (
-            "Hashes identify the exact stable data inputs. This manifest is provenance "
-            "metadata only and must not be interpreted as a market signal or action."
+            "Hashes identify the exact stable data inputs and the machine-readable "
+            "research-availability contract. This manifest is provenance metadata only "
+            "and must not be interpreted as a market signal or action."
         ),
     }
     safe_write_text(

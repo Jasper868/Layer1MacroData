@@ -1,0 +1,8 @@
+﻿contract_schema_version,as_of_local_date,module,required_indicator_count,ready_indicator_count,pending_indicator_count,degraded_indicator_count,blocked_indicator_count,module_research_readiness,non_ready_indicators,readiness_reason
+1,2026-06-21,equity_volatility_core,4,4,0,0,0,READY,,All required indicators are quality-OK and currently available.
+1,2026-06-21,credit_context,2,2,0,0,0,READY,,All required indicators are quality-OK and currently available.
+1,2026-06-21,rates_inflation,4,4,0,0,0,READY,,All required indicators are quality-OK and currently available.
+1,2026-06-21,fx_commodities,6,6,0,0,0,READY,,All required indicators are quality-OK and currently available.
+1,2026-06-21,market_asset_proxies,7,7,0,0,0,READY,,All required indicators are quality-OK and currently available.
+1,2026-06-21,volatility_curve_tail,4,1,0,3,0,DEGRADED,VIX9D_9日波动率; VIX3M_3个月波动率; VIX6M_6个月波动率,At least one required indicator is degraded.
+1,2026-06-21,options_positioning,6,6,0,0,0,READY,,All required indicators are quality-OK and currently available.
