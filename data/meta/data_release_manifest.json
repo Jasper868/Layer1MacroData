@@ -1,6 +1,6 @@
 {
   "manifest_schema_version": 1,
-  "generated_at_utc": "2026-06-20T17:33:56+00:00",
+  "generated_at_utc": "2026-06-20T17:53:34+00:00",
   "release_scope": "Layer1MacroData stable Data-to-Research handoff",
   "combined_macro_market": {
     "relative_path": "processed/combined_macro_market.csv",
@@ -99,7 +99,7 @@
       "relative_path": "meta/data_quality_summary.csv",
       "exists": true,
       "size_bytes": 979,
-      "sha256": "5e0021eb0d7e405621ff47a51b1f1aacf2a9cb235d5c1f00bdcee2961672ddde",
+      "sha256": "9d44a3e159a9b90f966398bd6adb4a2de8a115912cbe90361ea746fa26396135",
       "row_count": 10,
       "column_count": 6
     },
@@ -107,7 +107,7 @@
       "relative_path": "meta/data_quality_indicator_report.csv",
       "exists": true,
       "size_bytes": 7606,
-      "sha256": "ed8854821e487a01028a7f438754aebcf75afe5343be03a4cdee31d4bcfdfd8c",
+      "sha256": "52273f0cc82f42a29e00a5e80be1a62f983053080146f510702eb45ede9e3bab",
       "row_count": 33,
       "column_count": 24
     },
@@ -115,7 +115,7 @@
       "relative_path": "meta/data_quality_alerts.csv",
       "exists": true,
       "size_bytes": 563,
-      "sha256": "31bee22a56312cd056a89e7da8ac53bb72a1703b4b9efdcaa91a5e31cb5f3cc2",
+      "sha256": "edfff0132ca2de7e89b0bdb5394beab47e593e1d6174060612b5a2b5af9cd12a",
       "row_count": 3,
       "column_count": 7
     }

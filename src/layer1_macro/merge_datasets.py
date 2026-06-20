@@ -78,12 +78,10 @@ def merge_sources(dfs: list[pd.DataFrame]) -> pd.DataFrame:
         overlap = set(combined.columns).intersection(set(right.columns)) - {"date"}
 
         if overlap:
-            # Duplicate names mean the source contract has become ambiguous.
-            # Never create an automatic ``_dup`` column: Research could then
-            # unknowingly consume the wrong series.
-            raise ValueError(
-                "数据源字段重复，已停止合并。请明确修改指标名称或来源映射："
-                f"{sorted(overlap)}"
+            raise RuntimeError(
+                "Source schema collision: duplicate indicator column(s) "
+                f"{sorted(overlap)}. Stop the build and resolve the source "
+                "definition explicitly; never create automatic '_dup' columns."
             )
 
         combined = combined.merge(right, on="date", how="outer")

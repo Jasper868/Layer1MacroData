@@ -25,7 +25,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--offline",
         action="store_true",
-        help="Use local Git-synced caches only. No remote data requests.",
+        help=(
+            "Rebuild only from existing caches. It preserves acquisition-status "
+            "and Cboe latest-run evidence; no remote request is made."
+        ),
     )
     parser.add_argument(
         "--fred-yahoo-mode",
@@ -57,45 +60,51 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    args = parse_args()
-
-    if args.offline:
-        # A rebuild uses Git-synced caches only. Do not run source updaters in
-        # off mode: they would overwrite the last online acquisition reports
-        # with “not attempted” rows and blur the provenance boundary.
-        print(
-            "[INFO] 离线重建：保留上一次在线抓取状态；"
-            "不运行 FRED/yfinance/Cboe 取数脚本。"
-        )
-    else:
-        fred_mode = args.fred_yahoo_mode
-        cboe_mode = "force" if args.cboe_mode == "full" else args.cboe_mode
-
-        run_command([sys.executable, "scripts/run_fred_yahoo.py", "--mode", fred_mode])
-
-        cboe_command = [sys.executable, "scripts/run_cboe_pcr.py", "--mode", cboe_mode]
-        if not args.with_excel:
-            cboe_command.append("--no-excel")
-        run_command(cboe_command)
-
-    run_command([sys.executable, "scripts/run_build_combined.py"])
-
+def run_post_merge_checks(args: argparse.Namespace) -> None:
     if args.skip_data_quality:
         print(
-            "[INFO] 已跳过数据质量检查；本次结果不会生成 READY_TO_PUBLISH 发布结论。"
+            "[INFO] Data quality checks were skipped; this run cannot produce a "
+            "READY_TO_PUBLISH conclusion."
         )
         return
 
     run_command([sys.executable, "scripts/run_data_quality.py"])
-
-    # The release manifest hashes the exact Data-to-Research hand-off files.
-    # It is generated only after all source updates, merge, and quality checks.
     run_command([sys.executable, "scripts/run_build_release_manifest.py"])
     run_command([sys.executable, "scripts/check_data_release_ready.py"])
 
     if not args.skip_commit_check:
         run_command([sys.executable, "scripts/check_data_commit_ready.py"])
+
+
+def main() -> None:
+    args = parse_args()
+
+    if args.offline:
+        # Offline rebuilding must not call the source updaters with mode=off.
+        # Those updaters legitimately rewrite status/latest-run files, which
+        # would replace evidence of the last online acquisition with an
+        # unrelated local rebuild record.
+        print(
+            "[INFO] Offline rebuild: preserving prior acquisition status and "
+            "Cboe latest-run evidence; no source updater will run."
+        )
+        run_command([sys.executable, "scripts/run_build_combined.py"])
+        run_post_merge_checks(args)
+        return
+
+    cboe_mode = "force" if args.cboe_mode == "full" else args.cboe_mode
+
+    run_command(
+        [sys.executable, "scripts/run_fred_yahoo.py", "--mode", args.fred_yahoo_mode]
+    )
+
+    cboe_command = [sys.executable, "scripts/run_cboe_pcr.py", "--mode", cboe_mode]
+    if not args.with_excel:
+        cboe_command.append("--no-excel")
+    run_command(cboe_command)
+
+    run_command([sys.executable, "scripts/run_build_combined.py"])
+    run_post_merge_checks(args)
 
 
 if __name__ == "__main__":

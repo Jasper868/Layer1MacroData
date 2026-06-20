@@ -94,9 +94,10 @@ Git-synced caches:
 python scripts/run_data_update.py --offline
 ```
 
-Offline rebuilds do not run any source updater and do not rewrite the last online
-FRED/yfinance/Cboe acquisition reports. They rebuild only the formal handoff,
-quality reports, and release manifest from the already published caches.
+Offline rebuild does not run FRED, yfinance, or Cboe source updaters. It preserves
+the last online acquisition-status table and the last Cboe latest-run evidence,
+then rebuilds the merged table, quality reports, and release manifest from the
+existing caches.
 
 ## Repository boundary
 
