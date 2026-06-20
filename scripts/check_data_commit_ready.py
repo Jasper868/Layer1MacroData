@@ -33,6 +33,7 @@ REQUIRED_FILES = (
     META_DIR / "data_quality_alerts.csv",
     META_DIR / "combined_missing_value_report.csv",
     META_DIR / "source_metadata.csv",
+    META_DIR / "data_release_manifest.json",
 )
 
 FORBIDDEN_PREFIXES = (

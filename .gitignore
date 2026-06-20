@@ -32,6 +32,7 @@ archive/
 *.html
 *.htm
 *.log
+*.tmp
 
 # Research output does not belong in the data repository
 data/features/

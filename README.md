@@ -49,6 +49,7 @@ data/processed/latest_macro_snapshot.csv
 data/processed/cboe_pcr_latest_snapshot.csv
 data/meta/data_quality_summary.csv
 data/meta/data_status.csv
+data/meta/data_release_manifest.json
 ```
 
 ## First-time setup on a computer

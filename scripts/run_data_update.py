@@ -74,8 +74,18 @@ def main() -> None:
 
     run_command([sys.executable, "scripts/run_build_combined.py"])
 
-    if not args.skip_data_quality:
-        run_command([sys.executable, "scripts/run_data_quality.py"])
+    if args.skip_data_quality:
+        print(
+            "[INFO] 已跳过数据质量检查；本次结果不会生成 READY_TO_PUBLISH 发布结论。"
+        )
+        return
+
+    run_command([sys.executable, "scripts/run_data_quality.py"])
+
+    # The release manifest hashes the exact Data-to-Research hand-off files.
+    # It is generated only after all source updates, merge, and quality checks.
+    run_command([sys.executable, "scripts/run_build_release_manifest.py"])
+    run_command([sys.executable, "scripts/check_data_release_ready.py"])
 
     if not args.skip_commit_check:
         run_command([sys.executable, "scripts/check_data_commit_ready.py"])

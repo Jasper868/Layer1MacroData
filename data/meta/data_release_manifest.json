@@ -1,0 +1,114 @@
+{
+  "manifest_schema_version": 1,
+  "generated_at_utc": "2026-06-20T16:50:37+00:00",
+  "release_scope": "Layer1MacroData stable Data-to-Research handoff",
+  "combined_macro_market": {
+    "relative_path": "processed/combined_macro_market.csv",
+    "row_count": 5125,
+    "column_count": 34,
+    "start_date": "2006-06-13",
+    "end_date": "2026-06-18"
+  },
+  "overall_data_quality_status": "WARN",
+  "files": [
+    {
+      "relative_path": "raw/fred_cache.csv",
+      "exists": true,
+      "size_bytes": 488243,
+      "sha256": "f146af668d9561b974dbed3e851082473b3d6019bbb78fa49430ef54df09ee9c",
+      "row_count": 5125,
+      "column_count": 16,
+      "min_date": "2006-06-13",
+      "max_date": "2026-06-18"
+    },
+    {
+      "relative_path": "raw/yahoo_cache.csv",
+      "exists": true,
+      "size_bytes": 1095201,
+      "sha256": "dc39d900013b9e18b3237bb5981ad8921a49e6a81384023e6989a331468ba9c2",
+      "row_count": 5039,
+      "column_count": 13,
+      "min_date": "2006-06-13",
+      "max_date": "2026-06-17"
+    },
+    {
+      "relative_path": "raw/cboe_pcr_cache.csv",
+      "exists": true,
+      "size_bytes": 69849,
+      "sha256": "cd34552fb6b7581c4a89e5fcfa668d3c720bab964c7163a7837c4e0e96151197",
+      "row_count": 1685,
+      "column_count": 7,
+      "min_date": "2019-10-07",
+      "max_date": "2026-06-18"
+    },
+    {
+      "relative_path": "raw/cboe_pcr_volume_cache.csv",
+      "exists": true,
+      "size_bytes": 403711,
+      "sha256": "35b30d01abfd99cd49a4864c1b3acc06b984b5647ef950a8fba8877d50e27288",
+      "row_count": 1685,
+      "column_count": 31,
+      "min_date": "2019-10-07",
+      "max_date": "2026-06-18"
+    },
+    {
+      "relative_path": "processed/combined_macro_market.csv",
+      "exists": true,
+      "size_bytes": 1594259,
+      "sha256": "826734a8f0941eb7f33e3356fb149ca1f1b1f49fe45fd005ab8b61313aa203b9",
+      "row_count": 5125,
+      "column_count": 34,
+      "min_date": "2006-06-13",
+      "max_date": "2026-06-18"
+    },
+    {
+      "relative_path": "processed/latest_macro_snapshot.csv",
+      "exists": true,
+      "size_bytes": 1880,
+      "sha256": "1928aaaa9089280e6f1987b42ce5e75060706b60a356c092ebbf28b8662e70b9",
+      "row_count": 33,
+      "column_count": 6
+    },
+    {
+      "relative_path": "processed/cboe_pcr_latest_snapshot.csv",
+      "exists": true,
+      "size_bytes": 1496,
+      "sha256": "12dde52db9b5996fca5d6711323587117dbcaa5445fb61e67a92f54221ea0e34",
+      "row_count": 6,
+      "column_count": 12
+    },
+    {
+      "relative_path": "meta/source_metadata.csv",
+      "exists": true,
+      "size_bytes": 17308,
+      "sha256": "488bee06eba66a863fba53cd297c4538aec5544e34529f1dc62ec2bf02faeffb",
+      "row_count": 33,
+      "column_count": 13
+    },
+    {
+      "relative_path": "meta/data_quality_summary.csv",
+      "exists": true,
+      "size_bytes": 979,
+      "sha256": "6013d1ec8f3ad0a48e0ce425929fe7d58b56c3c1b1b1db5f37316016d5820822",
+      "row_count": 10,
+      "column_count": 6
+    },
+    {
+      "relative_path": "meta/data_quality_indicator_report.csv",
+      "exists": true,
+      "size_bytes": 7737,
+      "sha256": "cf02ee19df922eb386378dff68b60b3d823c23b60c3956aa2016f00ec585446a",
+      "row_count": 33,
+      "column_count": 24
+    },
+    {
+      "relative_path": "meta/data_quality_alerts.csv",
+      "exists": true,
+      "size_bytes": 563,
+      "sha256": "8edb1f26942eb430947d731f98e911f6fb4fd5ef8bebd3b0eea7b509b5e7fc88",
+      "row_count": 3,
+      "column_count": 7
+    }
+  ],
+  "interpretation": "Hashes identify the exact stable data inputs. This manifest is provenance metadata only and must not be interpreted as a market signal or action."
+}

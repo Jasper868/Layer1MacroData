@@ -25,6 +25,7 @@ from pandas.tseries.holiday import (
 )
 from pandas.tseries.offsets import CustomBusinessDay
 
+from src.layer1_macro.io_utils import safe_write_csv
 from src.layer1_macro.paths import (
     ensure_data_dirs,
     RAW_DIR,
@@ -411,7 +412,7 @@ class CboePcrUpdater:
             out.index = pd.to_datetime(out.index).normalize()
             out.index.name = "date"
             out = out.sort_index().reindex(columns=expected_cols)
-        out.to_csv(path, encoding="utf-8-sig")
+        safe_write_csv(out, path, index=True, announce=False)
 
     @staticmethod
     def _read_validation_cache(path: Path) -> pd.DataFrame:
@@ -430,7 +431,7 @@ class CboePcrUpdater:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         df = df.reindex(columns=VALIDATION_COLS)
-        df.to_csv(path, index=False, encoding="utf-8-sig")
+        safe_write_csv(df, path, announce=False)
 
     def load_caches(self) -> None:
         self.pcr_cache = self._read_date_index_csv(CBOE_PCR_CACHE_PATH, PCR_COLS)
@@ -457,11 +458,11 @@ class CboePcrUpdater:
 
         status_df = pd.DataFrame(self.status_rows).reindex(columns=STATUS_COLS)
         CBOE_STATUS_LATEST_RUN_PATH.parent.mkdir(parents=True, exist_ok=True)
-        status_df.to_csv(CBOE_STATUS_LATEST_RUN_PATH, index=False, encoding="utf-8-sig")
+        safe_write_csv(status_df, CBOE_STATUS_LATEST_RUN_PATH, announce=False)
 
         latest_validation_df = pd.DataFrame(self.latest_validation_rows).reindex(columns=VALIDATION_COLS)
         CBOE_VALIDATION_LATEST_RUN_PATH.parent.mkdir(parents=True, exist_ok=True)
-        latest_validation_df.to_csv(CBOE_VALIDATION_LATEST_RUN_PATH, index=False, encoding="utf-8-sig")
+        safe_write_csv(latest_validation_df, CBOE_VALIDATION_LATEST_RUN_PATH, announce=False)
 
     @staticmethod
     def merge_cache_by_index(base_df: pd.DataFrame, new_df: pd.DataFrame, expected_cols: list[str]) -> pd.DataFrame:
@@ -804,7 +805,19 @@ class CboePcrUpdater:
         return CboePcrUpdater.count_core_parsed(pcr_row) == len(REQUIRED_PCR_COLS)
 
     @staticmethod
-    def row_is_fully_validated(pcr_df: pd.DataFrame, volume_df: pd.DataFrame, date: pd.Timestamp) -> bool:
+    def row_is_fully_validated(
+        pcr_df: pd.DataFrame,
+        volume_df: pd.DataFrame,
+        validation_df: pd.DataFrame,
+        date: pd.Timestamp,
+    ) -> bool:
+        """Return whether a cached Cboe day is accepted and needs no re-fetch.
+
+        A row is complete only when all core PCR values exist *and* every core
+        validation row is accepted. The one legitimate partial case is a zero
+        Call-volume denominator: the ratio cannot be recalculated, but the
+        reported PCR can remain usable when range and total-volume checks pass.
+        """
         date = pd.Timestamp(date).normalize()
         if pcr_df.empty or date not in pcr_df.index:
             return False
@@ -812,15 +825,41 @@ class CboePcrUpdater:
             return False
         if volume_df.empty or date not in volume_df.index:
             return False
-
-        required_validation_cols: list[str] = []
-        for raw_label in REQUIRED_PCR_RAW_LABELS:
-            base = CBOE_PCR_META[raw_label]["pcr_col"].replace("_PCR", "")
-            required_validation_cols.extend([f"{base}_PCR_Calculated", f"{base}_PCR_Diff"])
-        required_validation_cols = [c for c in required_validation_cols if c in volume_df.columns]
-        if len(required_validation_cols) == 0:
+        if validation_df.empty:
             return False
-        return bool(volume_df.loc[date, required_validation_cols].notna().all())
+
+        validation = validation_df.copy()
+        validation["date"] = pd.to_datetime(validation["date"], errors="coerce").dt.normalize()
+        validation = validation.loc[
+            validation["date"].eq(date)
+            & validation["数据来源类型"].astype(str).eq("daily_page")
+            & validation["网页原始名称"].isin(REQUIRED_PCR_RAW_LABELS)
+        ].copy()
+        if len(validation) != len(REQUIRED_PCR_RAW_LABELS):
+            return False
+        if validation["网页原始名称"].duplicated().any():
+            return False
+
+        for _, row in validation.iterrows():
+            final_status = str(row.get("最终校验", ""))
+            if final_status == "通过":
+                continue
+
+            cross_status = str(row.get("PCR交叉验证", ""))
+            range_status = str(row.get("范围校验", ""))
+            total_status = str(row.get("Total校验", ""))
+            call_volume = pd.to_numeric(pd.Series([row.get("Call成交量")]), errors="coerce").iloc[0]
+            accepted_zero_denominator_case = (
+                final_status == "部分通过"
+                and cross_status == "无法验证"
+                and range_status == "通过"
+                and total_status == "通过"
+                and pd.notna(call_volume)
+                and float(call_volume) == 0.0
+            )
+            if not accepted_zero_denominator_case:
+                return False
+        return True
 
     # ------------------------------------------------------------------
     # Main update loop
@@ -829,7 +868,9 @@ class CboePcrUpdater:
         selected: list[pd.Timestamp] = []
         for dt in all_dates:
             dt = pd.Timestamp(dt).normalize()
-            already_complete = self.row_is_fully_validated(self.pcr_cache, self.volume_cache, dt)
+            already_complete = self.row_is_fully_validated(
+                self.pcr_cache, self.volume_cache, self.validation_cache, dt
+            )
             if self.config.remote_update_mode == "auto" and self.config.process_missing_only and already_complete:
                 continue
             selected.append(dt)
@@ -991,7 +1032,7 @@ class CboePcrUpdater:
             })
         df = pd.DataFrame(rows)
         CBOE_DICTIONARY_PATH.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(CBOE_DICTIONARY_PATH, index=False, encoding="utf-8-sig")
+        safe_write_csv(df, CBOE_DICTIONARY_PATH, announce=False)
         return df
 
     def build_missing_report(self, panel: pd.DataFrame) -> pd.DataFrame:
@@ -1017,7 +1058,7 @@ class CboePcrUpdater:
                 "最新有效值": latest_value,
             })
         df = pd.DataFrame(rows)
-        df.to_csv(CBOE_MISSING_REPORT_PATH, index=False, encoding="utf-8-sig")
+        safe_write_csv(df, CBOE_MISSING_REPORT_PATH, announce=False)
         return df
 
     def build_latest_snapshot(self, panel: pd.DataFrame) -> pd.DataFrame:
@@ -1049,7 +1090,7 @@ class CboePcrUpdater:
                 "daily_page_url": CBOE_DAILY_URL,
             })
         df = pd.DataFrame(rows)
-        df.to_csv(CBOE_LATEST_SNAPSHOT_PATH, index=False, encoding="utf-8-sig")
+        safe_write_csv(df, CBOE_LATEST_SNAPSHOT_PATH, announce=False)
         return df
 
     def build_yearly_coverage(self, panel: pd.DataFrame) -> pd.DataFrame:
@@ -1065,7 +1106,7 @@ class CboePcrUpdater:
                     row[f"{col}_覆盖率"] = valid / len(group) if len(group) > 0 else None
                 rows.append(row)
         df = pd.DataFrame(rows)
-        df.to_csv(CBOE_YEARLY_COVERAGE_PATH, index=False, encoding="utf-8-sig")
+        safe_write_csv(df, CBOE_YEARLY_COVERAGE_PATH, announce=False)
         return df
 
     def build_validation_summary(self) -> pd.DataFrame:
@@ -1090,7 +1131,7 @@ class CboePcrUpdater:
                     "通过或部分通过率": (passed + partial) / total if total > 0 else None,
                 })
         out = pd.DataFrame(rows)
-        out.to_csv(CBOE_VALIDATION_SUMMARY_PATH, index=False, encoding="utf-8-sig")
+        safe_write_csv(out, CBOE_VALIDATION_SUMMARY_PATH, announce=False)
         return out
 
     def build_file_size_report(self) -> pd.DataFrame:
@@ -1115,7 +1156,7 @@ class CboePcrUpdater:
                 "大小MiB": self.safe_file_size_mb(path),
             })
         df = pd.DataFrame(rows)
-        df.to_csv(CBOE_FILE_SIZE_PATH, index=False, encoding="utf-8-sig")
+        safe_write_csv(df, CBOE_FILE_SIZE_PATH, announce=False)
         return df
 
     def export_excel_report(
