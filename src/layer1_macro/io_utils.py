@@ -49,7 +49,12 @@ def safe_write_csv(
     ensure_parent_dir(path)
     temp_path = _temporary_sibling_path(path)
     try:
-        df.to_csv(temp_path, index=index, encoding=encoding)
+        df.to_csv(
+            temp_path,
+            index=index,
+            encoding=encoding,
+            lineterminator="\n",
+        )
         os.replace(temp_path, path)
     finally:
         if temp_path.exists():
@@ -64,7 +69,8 @@ def safe_write_text(text: str, path: Path, *, encoding: str = "utf-8", announce:
     ensure_parent_dir(path)
     temp_path = _temporary_sibling_path(path)
     try:
-        temp_path.write_text(text, encoding=encoding)
+        with temp_path.open("w", encoding=encoding, newline="\n") as handle:
+            handle.write(text)
         os.replace(temp_path, path)
     finally:
         if temp_path.exists():

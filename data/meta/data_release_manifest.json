@@ -1,6 +1,6 @@
 {
   "manifest_schema_version": 2,
-  "generated_at_utc": "2026-06-20T18:05:39+00:00",
+  "generated_at_utc": "2026-06-21T03:19:24+00:00",
   "release_scope": "Layer1MacroData stable Data-to-Research handoff",
   "combined_macro_market": {
     "relative_path": "processed/combined_macro_market.csv",
@@ -14,8 +14,8 @@
     {
       "relative_path": "raw/fred_cache.csv",
       "exists": true,
-      "size_bytes": 488243,
-      "sha256": "f146af668d9561b974dbed3e851082473b3d6019bbb78fa49430ef54df09ee9c",
+      "size_bytes": 483117,
+      "sha256": "6c76dd25db0bed30e4d0d6e7cf5d22c75feda8e7465a20303839f6fc9bbf87b3",
       "row_count": 5125,
       "column_count": 16,
       "min_date": "2006-06-13",
@@ -24,8 +24,8 @@
     {
       "relative_path": "raw/yahoo_cache.csv",
       "exists": true,
-      "size_bytes": 1095514,
-      "sha256": "c3dcf5dfafc536f27b45701c016d18e38b22a4f8c2df50e0cc096ea23b861908",
+      "size_bytes": 1090472,
+      "sha256": "f0c3a84fc756efc0eddea7b421a81cbdd2b6dad09415e6d64760dd0a532d3e3a",
       "row_count": 5041,
       "column_count": 13,
       "min_date": "2006-06-13",
@@ -34,8 +34,8 @@
     {
       "relative_path": "raw/cboe_pcr_cache.csv",
       "exists": true,
-      "size_bytes": 69849,
-      "sha256": "cd34552fb6b7581c4a89e5fcfa668d3c720bab964c7163a7837c4e0e96151197",
+      "size_bytes": 68163,
+      "sha256": "5238198ca55b1b7acbeaa41f3ee5e6d4000f0b062f06de98dc4d60c3fcab1034",
       "row_count": 1685,
       "column_count": 7,
       "min_date": "2019-10-07",
@@ -44,8 +44,8 @@
     {
       "relative_path": "raw/cboe_pcr_volume_cache.csv",
       "exists": true,
-      "size_bytes": 403711,
-      "sha256": "35b30d01abfd99cd49a4864c1b3acc06b984b5647ef950a8fba8877d50e27288",
+      "size_bytes": 402025,
+      "sha256": "55567e010174c72a95eee71e0ea2049169f95a4ece4bc137be5f0d252d727bd1",
       "row_count": 1685,
       "column_count": 31,
       "min_date": "2019-10-07",
@@ -54,8 +54,8 @@
     {
       "relative_path": "meta/cboe_pcr_validation_cache.csv",
       "exists": true,
-      "size_bytes": 2677124,
-      "sha256": "a58cd3480ff7a3a40262c90a45cfa6356c44d9c78847989cff46372e251a9a47",
+      "size_bytes": 2667013,
+      "sha256": "c0d87e20375325f07ae139c6063d54017b52971a535cc263ff6de111c5a8b7c8",
       "row_count": 10110,
       "column_count": 19,
       "min_date": "2019-10-07",
@@ -64,8 +64,8 @@
     {
       "relative_path": "processed/combined_macro_market.csv",
       "exists": true,
-      "size_bytes": 1594560,
-      "sha256": "cc406ebb765b338b694622d3a016c04ba659c6e334be02addffecccb94ff465d",
+      "size_bytes": 1589433,
+      "sha256": "12d68d31a7c983ca22193444482f0f14c52e7bd7071f2289adaa2d09c9619a07",
       "row_count": 5126,
       "column_count": 34,
       "min_date": "2006-06-13",
@@ -74,64 +74,64 @@
     {
       "relative_path": "processed/latest_macro_snapshot.csv",
       "exists": true,
-      "size_bytes": 1865,
-      "sha256": "eecd966f507172d78c1e67558c06221b7b163caa27949353a69ffd579e5966c8",
+      "size_bytes": 1831,
+      "sha256": "cf4af3823afee5e43ab980760896a6a4c570c521c98c115cb077c996c52ad794",
       "row_count": 33,
       "column_count": 6
     },
     {
       "relative_path": "processed/cboe_pcr_latest_snapshot.csv",
       "exists": true,
-      "size_bytes": 1496,
-      "sha256": "12dde52db9b5996fca5d6711323587117dbcaa5445fb61e67a92f54221ea0e34",
+      "size_bytes": 1489,
+      "sha256": "e11a117f6af2eee8a952d770ab7ff521e173ac46d2fde333f8f207ed6b0b4d09",
       "row_count": 6,
       "column_count": 12
     },
     {
       "relative_path": "meta/source_metadata.csv",
       "exists": true,
-      "size_bytes": 17308,
-      "sha256": "488bee06eba66a863fba53cd297c4538aec5544e34529f1dc62ec2bf02faeffb",
+      "size_bytes": 17274,
+      "sha256": "6b7cbc5f98c24f83be118098c06e07cf7f535ff50b72aa4db7e28e530408f518",
       "row_count": 33,
       "column_count": 13
     },
     {
       "relative_path": "meta/data_quality_summary.csv",
       "exists": true,
-      "size_bytes": 979,
-      "sha256": "589f6039b0eb5a44e0dc8788a5ed0cf8f1b2ef8abef11734ac1ddcb2c1e38dbc",
+      "size_bytes": 968,
+      "sha256": "8d045c15ff30473ad9ab10ba940f4e41c66ad7c8cc2d2555b66c283e7a40caf8",
       "row_count": 10,
       "column_count": 6
     },
     {
       "relative_path": "meta/data_quality_indicator_report.csv",
       "exists": true,
-      "size_bytes": 7606,
-      "sha256": "79574cf5c6c58ca8945b4cdd82e7d5631b0afec4170d0263f22786c5c8253a23",
+      "size_bytes": 7572,
+      "sha256": "a3024a740e6beb3f9619f598cb73a00114d04e80a28b537a8f90af19f81e5173",
       "row_count": 33,
       "column_count": 24
     },
     {
       "relative_path": "meta/data_quality_alerts.csv",
       "exists": true,
-      "size_bytes": 563,
-      "sha256": "748039b8d51fba06947851946829545bb4ac1d3e919c9c220f03cbcd4a66ed64",
+      "size_bytes": 559,
+      "sha256": "96d78dc95e15e9203e42e76f9342f0b678e01b9b1123fe247b7a13f405ef0c8f",
       "row_count": 3,
       "column_count": 7
     },
     {
       "relative_path": "meta/research_availability_contract.csv",
       "exists": true,
-      "size_bytes": 19007,
-      "sha256": "1a8bda07b00a7690870e60ad6c26aea876e948833978ed0c86ab8e354e7b9eda",
+      "size_bytes": 18973,
+      "sha256": "d8fef13a06458ec8e449300f1a5d2e228630b4ab09481e0eb87eae0ae31e0ed8",
       "row_count": 33,
       "column_count": 16
     },
     {
       "relative_path": "meta/research_module_readiness.csv",
       "exists": true,
-      "size_bytes": 1084,
-      "sha256": "979686a1f0cce3c82e56e50a151dd04c3048547c638067874abc866e945eb8c3",
+      "size_bytes": 1076,
+      "sha256": "6efbe65132a6e44e3e300f69520e6920e026af0bcebee198276a235574babe51",
       "row_count": 7,
       "column_count": 11
     }
