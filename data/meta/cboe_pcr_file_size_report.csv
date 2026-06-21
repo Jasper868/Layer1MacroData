@@ -2,8 +2,10 @@
 PCR缓存,cboe_pcr_cache.csv,是,0.065
 成交量缓存,cboe_pcr_volume_cache.csv,是,0.3834
 验证缓存,cboe_pcr_validation_cache.csv,是,2.5435
-本轮状态,cboe_pcr_status_latest_run.csv,是,0.0003
+本轮状态,cboe_pcr_status_latest_run.csv,是,0.0004
 本轮验证,cboe_pcr_validation_latest_run.csv,是,0.0002
+本轮运行审计,cboe_pcr_last_run_audit.json,是,0.0006
+最近成功采集,cboe_pcr_last_successful_acquisition.json,是,0.0005
 缺失值统计,cboe_pcr_missing_value_report.csv,是,0.0006
 最新快照,cboe_pcr_latest_snapshot.csv,是,0.0014
 年度覆盖率,cboe_pcr_yearly_coverage.csv,是,0.0008

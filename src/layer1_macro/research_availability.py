@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import date
-from pathlib import Path
 
 import pandas as pd
 
@@ -69,13 +68,39 @@ MODULES: dict[str, tuple[str, ...]] = {
     ),
 }
 
+CONTRACT_SCHEMA_VERSION = 2
+
 QUALITY_OK = "OK"
 QUALITY_WARN = "WARN"
 QUALITY_FAIL = "FAIL"
+
+# Backward-compatible current readiness values. Research code may continue to
+# consume this column while it is migrated to the more explicit prospective
+# state fields below.
 READINESS_READY = "READY"
 READINESS_PENDING = "PENDING_LATEST_OBSERVATION"
 READINESS_DEGRADED = "DEGRADED"
 READINESS_BLOCKED = "BLOCKED"
+
+# Three-layer admission model:
+# 1) Data validity: structural / range / coverage quality.
+# 2) Historical research usability: whether the series can be studied when
+#    aligned by its availability lag.
+# 3) Prospective state readiness: whether it is fresh enough to enter a
+#    current-day state calculation.
+DATA_VALID = "DATA_VALID"
+DATA_DEGRADED = "DATA_DEGRADED"
+DATA_INVALID = "DATA_INVALID"
+
+HISTORICAL_RESEARCH_USABLE = "HISTORICAL_RESEARCH_USABLE"
+HISTORICAL_RESEARCH_DEGRADED = "HISTORICAL_RESEARCH_DEGRADED"
+HISTORICAL_RESEARCH_UNUSABLE = "HISTORICAL_RESEARCH_UNUSABLE"
+
+PROSPECTIVE_STATE_READY = "PROSPECTIVE_STATE_READY"
+PROSPECTIVE_STATE_PENDING = "PROSPECTIVE_STATE_PENDING"
+PROSPECTIVE_STATE_DEGRADED = "PROSPECTIVE_STATE_DEGRADED"
+PROSPECTIVE_STATE_STALE = "PROSPECTIVE_STATE_STALE"
+PROSPECTIVE_STATE_BLOCKED = "PROSPECTIVE_STATE_BLOCKED"
 
 
 class AvailabilityContractError(RuntimeError):
@@ -83,6 +108,7 @@ class AvailabilityContractError(RuntimeError):
 
 
 def _local_as_of_date() -> pd.Timestamp:
+    """Use the computer's local calendar date, by project convention."""
     return pd.Timestamp(date.today())
 
 
@@ -96,6 +122,7 @@ def _validate_source_metadata(metadata: pd.DataFrame, indicators: list[str]) -> 
         "code",
         "indicator_name",
         "conservative_availability_lag_calendar_days",
+        "maximum_expected_tail_delay_calendar_days",
         "availability_rule",
         "prospective_alignment",
         "v1_admission_note",
@@ -124,16 +151,19 @@ def _validate_source_metadata(metadata: pd.DataFrame, indicators: list[str]) -> 
             f"missing={missing_metadata}; extra={extra_metadata}"
         )
 
-    lag = pd.to_numeric(
-        work["conservative_availability_lag_calendar_days"], errors="coerce"
-    )
-    invalid_lag = lag.isna() | (lag < 0) | (lag % 1 != 0)
-    if invalid_lag.any():
-        bad = work.loc[invalid_lag, "indicator_name"].tolist()
-        raise AvailabilityContractError(
-            f"Availability lag must be a non-negative whole number. Bad indicator(s): {bad}"
-        )
-    work["conservative_availability_lag_calendar_days"] = lag.astype(int)
+    for column in (
+        "conservative_availability_lag_calendar_days",
+        "maximum_expected_tail_delay_calendar_days",
+    ):
+        numeric = pd.to_numeric(work[column], errors="coerce")
+        invalid = numeric.isna() | (numeric < 0) | (numeric % 1 != 0)
+        if invalid.any():
+            bad = work.loc[invalid, "indicator_name"].tolist()
+            raise AvailabilityContractError(
+                f"{column} must be a non-negative whole number. Bad indicator(s): {bad}"
+            )
+        work[column] = numeric.astype(int)
+
     return work.set_index("indicator_name", drop=False)
 
 
@@ -164,29 +194,6 @@ def _quality_by_indicator(indicators: list[str]) -> pd.DataFrame:
     return work.set_index("indicator", drop=False)
 
 
-def _indicator_readiness(
-    quality_status: str,
-    latest_valid_date: pd.Timestamp | pd.NaT,
-    latest_available_on: pd.Timestamp | pd.NaT,
-    as_of_date: pd.Timestamp,
-) -> tuple[str, str]:
-    status = str(quality_status).strip().upper()
-    if status == QUALITY_FAIL or pd.isna(latest_valid_date):
-        return READINESS_BLOCKED, "Quality report is FAIL or latest valid observation is unavailable."
-    if status == QUALITY_WARN:
-        return READINESS_DEGRADED, "Quality report is WARN; use only as degraded context, not as fresh input."
-    if status != QUALITY_OK:
-        return READINESS_BLOCKED, f"Unrecognised quality status: {quality_status!r}."
-    if pd.isna(latest_available_on):
-        return READINESS_BLOCKED, "Latest observation has no declared available-on date."
-    if latest_available_on > as_of_date:
-        return (
-            READINESS_PENDING,
-            "Latest observation exists but is not yet usable under the conservative availability lag.",
-        )
-    return READINESS_READY, "Quality is OK and the latest observation has passed the declared availability lag."
-
-
 def _module_membership(indicators: list[str]) -> dict[str, str]:
     membership: dict[str, str] = {}
     for module, members in MODULES.items():
@@ -209,12 +216,98 @@ def _module_membership(indicators: list[str]) -> dict[str, str]:
     return membership
 
 
-def build_research_availability_contract() -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Build the machine-readable point-in-time handoff contract.
+def _data_validity_status(quality_status: str) -> tuple[str, str]:
+    status = str(quality_status).strip().upper()
+    if status == QUALITY_OK:
+        return DATA_VALID, "Quality report is OK."
+    if status == QUALITY_WARN:
+        return DATA_DEGRADED, "Quality report is WARN; retain as degraded context only."
+    return DATA_INVALID, f"Quality report is not usable for research: {quality_status!r}."
 
-    This function does not create features, scores, alerts, or portfolio actions.
-    It records the declared availability rule that the Research repository must
-    apply before using an observation in any historical or live analysis.
+
+def _historical_research_status(data_validity_status: str) -> tuple[str, str]:
+    if data_validity_status == DATA_VALID:
+        return (
+            HISTORICAL_RESEARCH_USABLE,
+            "Eligible for historical research only after the declared availability lag.",
+        )
+    if data_validity_status == DATA_DEGRADED:
+        return (
+            HISTORICAL_RESEARCH_DEGRADED,
+            "Historical research is possible only as degraded descriptive context; do not treat it as a robust input.",
+        )
+    return (
+        HISTORICAL_RESEARCH_UNUSABLE,
+        "Not eligible for historical research because the data-validity layer is invalid.",
+    )
+
+
+def _prospective_state_status(
+    *,
+    data_validity_status: str,
+    latest_valid_date: pd.Timestamp | pd.NaT,
+    latest_available_on: pd.Timestamp | pd.NaT,
+    latest_observation_age_calendar_days: int | None,
+    maximum_expected_tail_delay_calendar_days: int,
+    as_of_date: pd.Timestamp,
+) -> tuple[str, str]:
+    """Classify whether an observation may enter a current-day state calculation.
+
+    This check deliberately uses local calendar days, matching the project's
+    ``date.today()`` convention. It does not infer a market-session calendar.
+    """
+    if data_validity_status == DATA_INVALID or pd.isna(latest_valid_date):
+        return (
+            PROSPECTIVE_STATE_BLOCKED,
+            "No valid latest observation is available for a prospective state calculation.",
+        )
+    if pd.isna(latest_available_on):
+        return (
+            PROSPECTIVE_STATE_BLOCKED,
+            "Latest observation has no declared available-on date.",
+        )
+    if latest_available_on > as_of_date:
+        return (
+            PROSPECTIVE_STATE_PENDING,
+            "Latest observation exists but has not yet passed its declared availability lag.",
+        )
+    if (
+        latest_observation_age_calendar_days is not None
+        and latest_observation_age_calendar_days > maximum_expected_tail_delay_calendar_days
+    ):
+        return (
+            PROSPECTIVE_STATE_STALE,
+            "Latest observation age exceeds the source-specific prospective freshness budget.",
+        )
+    if data_validity_status == DATA_DEGRADED:
+        return (
+            PROSPECTIVE_STATE_DEGRADED,
+            "Data quality is WARN even though the latest observation is within the source-specific freshness budget.",
+        )
+    return (
+        PROSPECTIVE_STATE_READY,
+        "Data is valid, available under the declared lag, and within the source-specific freshness budget.",
+    )
+
+
+def _legacy_readiness(prospective_status: str) -> tuple[str, str]:
+    """Map the explicit prospective state to the existing compatibility column."""
+    if prospective_status == PROSPECTIVE_STATE_READY:
+        return READINESS_READY, "Prospective state is ready."
+    if prospective_status == PROSPECTIVE_STATE_PENDING:
+        return READINESS_PENDING, "Prospective state is pending its availability lag."
+    if prospective_status in {PROSPECTIVE_STATE_DEGRADED, PROSPECTIVE_STATE_STALE}:
+        return READINESS_DEGRADED, "Prospective state is degraded or stale."
+    return READINESS_BLOCKED, "Prospective state is blocked."
+
+
+def build_research_availability_contract() -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Build the machine-readable Data -> Research point-in-time handoff contract.
+
+    The output has three separate gates:
+    ``data_validity_status``, ``historical_research_status``, and
+    ``prospective_state_status``. It does not create features, scores, alerts,
+    or portfolio actions.
     """
     ensure_data_dirs()
     combined = safe_read_csv(COMBINED_PATH)
@@ -237,34 +330,45 @@ def build_research_availability_contract() -> tuple[pd.DataFrame, pd.DataFrame]:
         metadata_row = metadata.loc[indicator]
         quality_row = quality.loc[indicator]
         latest_valid_date = _parse_date(quality_row["latest_valid_date"])
-        lag_days = int(metadata_row["conservative_availability_lag_calendar_days"])
+        availability_lag_days = int(metadata_row["conservative_availability_lag_calendar_days"])
+        maximum_tail_delay_days = int(
+            metadata_row["maximum_expected_tail_delay_calendar_days"]
+        )
         latest_available_on = (
-            latest_valid_date + pd.Timedelta(days=lag_days)
+            latest_valid_date + pd.Timedelta(days=availability_lag_days)
             if not pd.isna(latest_valid_date)
             else pd.NaT
         )
-        readiness, reason = _indicator_readiness(
-            str(quality_row["status"]),
-            latest_valid_date,
-            latest_available_on,
-            as_of_date,
+        observation_age_days: int | None
+        if pd.isna(latest_valid_date):
+            observation_age_days = None
+        else:
+            observation_age_days = int(
+                (as_of_date.normalize() - latest_valid_date.normalize()).days
+            )
+
+        data_status, data_reason = _data_validity_status(str(quality_row["status"]))
+        historical_status, historical_reason = _historical_research_status(data_status)
+        prospective_status, prospective_reason = _prospective_state_status(
+            data_validity_status=data_status,
+            latest_valid_date=latest_valid_date,
+            latest_available_on=latest_available_on,
+            latest_observation_age_calendar_days=observation_age_days,
+            maximum_expected_tail_delay_calendar_days=maximum_tail_delay_days,
+            as_of_date=as_of_date,
         )
+        legacy_readiness, legacy_reason = _legacy_readiness(prospective_status)
+
         rows.append(
             {
-                "contract_schema_version": 1,
+                "contract_schema_version": CONTRACT_SCHEMA_VERSION,
                 "as_of_local_date": as_of_date.strftime("%Y-%m-%d"),
                 "module": membership[indicator],
                 "indicator": indicator,
                 "source": str(metadata_row["source"]),
                 "source_code": str(metadata_row["code"]),
-                "availability_lag_calendar_days": lag_days,
-                "historical_research_rule": (
-                    "usable only when research_date >= observation_date + "
-                    f"{lag_days} calendar day(s); never forward-fill before availability"
-                ),
-                "availability_rule": str(metadata_row["availability_rule"]),
-                "prospective_alignment": str(metadata_row["prospective_alignment"]),
-                "admission_note": str(metadata_row["v1_admission_note"]),
+                "availability_lag_calendar_days": availability_lag_days,
+                "maximum_expected_tail_delay_calendar_days": maximum_tail_delay_days,
                 "latest_valid_observation_date": (
                     latest_valid_date.strftime("%Y-%m-%d")
                     if not pd.isna(latest_valid_date)
@@ -275,9 +379,26 @@ def build_research_availability_contract() -> tuple[pd.DataFrame, pd.DataFrame]:
                     if not pd.isna(latest_available_on)
                     else ""
                 ),
+                "latest_observation_age_calendar_days": observation_age_days,
                 "quality_status": str(quality_row["status"]),
-                "current_research_readiness": readiness,
-                "readiness_reason": reason,
+                "data_validity_status": data_status,
+                "data_validity_reason": data_reason,
+                "historical_research_status": historical_status,
+                "historical_research_rule": (
+                    "usable only when research_date >= observation_date + "
+                    f"{availability_lag_days} calendar day(s); never forward-fill before availability"
+                ),
+                "historical_research_reason": historical_reason,
+                "prospective_state_status": prospective_status,
+                "prospective_state_ready": prospective_status == PROSPECTIVE_STATE_READY,
+                "prospective_state_reason": prospective_reason,
+                "availability_rule": str(metadata_row["availability_rule"]),
+                "prospective_alignment": str(metadata_row["prospective_alignment"]),
+                "admission_note": str(metadata_row["v1_admission_note"]),
+                # Compatibility columns retained until the Research repository is
+                # migrated to use prospective_state_status directly.
+                "current_research_readiness": legacy_readiness,
+                "readiness_reason": legacy_reason,
             }
         )
 
@@ -288,31 +409,68 @@ def build_research_availability_contract() -> tuple[pd.DataFrame, pd.DataFrame]:
     return contract, modules
 
 
+def _module_prospective_state(members: pd.DataFrame) -> tuple[str, str]:
+    statuses = set(members["prospective_state_status"].astype(str))
+    if PROSPECTIVE_STATE_BLOCKED in statuses:
+        return PROSPECTIVE_STATE_BLOCKED, "At least one required indicator is blocked."
+    if PROSPECTIVE_STATE_STALE in statuses:
+        return PROSPECTIVE_STATE_STALE, "At least one required indicator exceeds its source-specific freshness budget."
+    if PROSPECTIVE_STATE_DEGRADED in statuses:
+        return PROSPECTIVE_STATE_DEGRADED, "At least one required indicator is data-quality degraded."
+    if PROSPECTIVE_STATE_PENDING in statuses:
+        return PROSPECTIVE_STATE_PENDING, "At least one required indicator is pending its declared availability lag."
+    return PROSPECTIVE_STATE_READY, "All required indicators are valid, available, and within their freshness budgets."
+
+
 def _module_readiness_from_members(members: pd.DataFrame) -> tuple[str, str]:
     readiness_values = set(members["current_research_readiness"].astype(str))
     if READINESS_BLOCKED in readiness_values:
         return READINESS_BLOCKED, "At least one required indicator is blocked."
     if READINESS_DEGRADED in readiness_values:
-        return READINESS_DEGRADED, "At least one required indicator is degraded."
+        return READINESS_DEGRADED, "At least one required indicator is degraded or stale."
     if READINESS_PENDING in readiness_values:
         return READINESS_PENDING, "At least one latest observation is not yet available under the declared lag."
-    return READINESS_READY, "All required indicators are quality-OK and currently available."
+    return READINESS_READY, "All required indicators are quality-valid, available, and prospectively fresh."
 
 
 def build_module_readiness(contract: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     for module in MODULES:
         members = contract.loc[contract["module"].eq(module)].copy()
-        readiness, reason = _module_readiness_from_members(members)
+        legacy_readiness, legacy_reason = _module_readiness_from_members(members)
+        prospective_status, prospective_reason = _module_prospective_state(members)
         non_ready = members.loc[
-            ~members["current_research_readiness"].eq(READINESS_READY), "indicator"
+            ~members["prospective_state_status"].eq(PROSPECTIVE_STATE_READY), "indicator"
         ].astype(str).tolist()
         rows.append(
             {
-                "contract_schema_version": 1,
+                "contract_schema_version": CONTRACT_SCHEMA_VERSION,
                 "as_of_local_date": str(members.iloc[0]["as_of_local_date"]),
                 "module": module,
                 "required_indicator_count": int(len(members)),
+                "prospective_ready_indicator_count": int(
+                    members["prospective_state_status"].eq(PROSPECTIVE_STATE_READY).sum()
+                ),
+                "prospective_pending_indicator_count": int(
+                    members["prospective_state_status"].eq(PROSPECTIVE_STATE_PENDING).sum()
+                ),
+                "prospective_degraded_indicator_count": int(
+                    members["prospective_state_status"].eq(PROSPECTIVE_STATE_DEGRADED).sum()
+                ),
+                "prospective_stale_indicator_count": int(
+                    members["prospective_state_status"].eq(PROSPECTIVE_STATE_STALE).sum()
+                ),
+                "prospective_blocked_indicator_count": int(
+                    members["prospective_state_status"].eq(PROSPECTIVE_STATE_BLOCKED).sum()
+                ),
+                "module_prospective_state_status": prospective_status,
+                "module_prospective_state_reason": prospective_reason,
+                "module_research_readiness": legacy_readiness,
+                "non_ready_indicators": "; ".join(non_ready),
+                "readiness_reason": legacy_reason,
+                # Legacy count fields remain for compatibility with existing
+                # dashboards and scripts. They are derived from the compatibility
+                # readiness column, not from data quality alone.
                 "ready_indicator_count": int(
                     members["current_research_readiness"].eq(READINESS_READY).sum()
                 ),
@@ -325,9 +483,6 @@ def build_module_readiness(contract: pd.DataFrame) -> pd.DataFrame:
                 "blocked_indicator_count": int(
                     members["current_research_readiness"].eq(READINESS_BLOCKED).sum()
                 ),
-                "module_research_readiness": readiness,
-                "non_ready_indicators": "; ".join(non_ready),
-                "readiness_reason": reason,
             }
         )
     return pd.DataFrame(rows)
@@ -338,11 +493,12 @@ def main() -> None:
     print("[完成] Research availability contract generated")
     print(f"indicator_contract = {INDICATOR_CONTRACT_PATH}")
     print(f"module_readiness   = {MODULE_READINESS_PATH}")
-    print("\n[Module readiness]")
+    print("\n[Module prospective state]")
     print(
         modules[
             [
                 "module",
+                "module_prospective_state_status",
                 "module_research_readiness",
                 "non_ready_indicators",
             ]

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "record_type": "LAST_SUCCESSFUL_REMOTE_ACQUISITION",
+  "recorded_at_local": "2026-06-21 11:48:50",
+  "latest_successful_remote_date": "",
+  "latest_fully_validated_cache_date": "2026-06-18",
+  "remote_update_mode": "auto",
+  "status": "NO_NEW_SUCCESS_EVIDENCE_IN_CURRENT_RUN",
+  "interpretation": "No successful remote Cboe acquisition occurred in this run. The latest fully validated cache date is reported, but its original remote-acquisition timestamp is not inferred from cache contents."
+}

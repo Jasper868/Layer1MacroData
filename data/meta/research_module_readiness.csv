@@ -1,8 +1,8 @@
-﻿contract_schema_version,as_of_local_date,module,required_indicator_count,ready_indicator_count,pending_indicator_count,degraded_indicator_count,blocked_indicator_count,module_research_readiness,non_ready_indicators,readiness_reason
-1,2026-06-21,equity_volatility_core,4,4,0,0,0,READY,,All required indicators are quality-OK and currently available.
-1,2026-06-21,credit_context,2,2,0,0,0,READY,,All required indicators are quality-OK and currently available.
-1,2026-06-21,rates_inflation,4,4,0,0,0,READY,,All required indicators are quality-OK and currently available.
-1,2026-06-21,fx_commodities,6,6,0,0,0,READY,,All required indicators are quality-OK and currently available.
-1,2026-06-21,market_asset_proxies,7,7,0,0,0,READY,,All required indicators are quality-OK and currently available.
-1,2026-06-21,volatility_curve_tail,4,1,0,3,0,DEGRADED,VIX9D_9日波动率; VIX3M_3个月波动率; VIX6M_6个月波动率,At least one required indicator is degraded.
-1,2026-06-21,options_positioning,6,6,0,0,0,READY,,All required indicators are quality-OK and currently available.
+﻿contract_schema_version,as_of_local_date,module,required_indicator_count,prospective_ready_indicator_count,prospective_pending_indicator_count,prospective_degraded_indicator_count,prospective_stale_indicator_count,prospective_blocked_indicator_count,module_prospective_state_status,module_prospective_state_reason,module_research_readiness,non_ready_indicators,readiness_reason,ready_indicator_count,pending_indicator_count,degraded_indicator_count,blocked_indicator_count
+2,2026-06-21,equity_volatility_core,4,4,0,0,0,0,PROSPECTIVE_STATE_READY,"All required indicators are valid, available, and within their freshness budgets.",READY,,"All required indicators are quality-valid, available, and prospectively fresh.",4,0,0,0
+2,2026-06-21,credit_context,2,2,0,0,0,0,PROSPECTIVE_STATE_READY,"All required indicators are valid, available, and within their freshness budgets.",READY,,"All required indicators are quality-valid, available, and prospectively fresh.",2,0,0,0
+2,2026-06-21,rates_inflation,4,4,0,0,0,0,PROSPECTIVE_STATE_READY,"All required indicators are valid, available, and within their freshness budgets.",READY,,"All required indicators are quality-valid, available, and prospectively fresh.",4,0,0,0
+2,2026-06-21,fx_commodities,6,6,0,0,0,0,PROSPECTIVE_STATE_READY,"All required indicators are valid, available, and within their freshness budgets.",READY,,"All required indicators are quality-valid, available, and prospectively fresh.",6,0,0,0
+2,2026-06-21,market_asset_proxies,7,7,0,0,0,0,PROSPECTIVE_STATE_READY,"All required indicators are valid, available, and within their freshness budgets.",READY,,"All required indicators are quality-valid, available, and prospectively fresh.",7,0,0,0
+2,2026-06-21,volatility_curve_tail,4,1,0,0,3,0,PROSPECTIVE_STATE_STALE,At least one required indicator exceeds its source-specific freshness budget.,DEGRADED,VIX9D_9日波动率; VIX3M_3个月波动率; VIX6M_6个月波动率,At least one required indicator is degraded or stale.,1,0,3,0
+2,2026-06-21,options_positioning,6,6,0,0,0,0,PROSPECTIVE_STATE_READY,"All required indicators are valid, available, and within their freshness budgets.",READY,,"All required indicators are quality-valid, available, and prospectively fresh.",6,0,0,0

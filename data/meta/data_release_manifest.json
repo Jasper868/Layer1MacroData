@@ -1,6 +1,6 @@
 {
   "manifest_schema_version": 2,
-  "generated_at_utc": "2026-06-21T03:24:40+00:00",
+  "generated_at_utc": "2026-06-21T03:49:04+00:00",
   "release_scope": "Layer1MacroData stable Data-to-Research handoff",
   "combined_macro_market": {
     "relative_path": "processed/combined_macro_market.csv",
@@ -24,8 +24,8 @@
     {
       "relative_path": "raw/yahoo_cache.csv",
       "exists": true,
-      "size_bytes": 1090472,
-      "sha256": "f0c3a84fc756efc0eddea7b421a81cbdd2b6dad09415e6d64760dd0a532d3e3a",
+      "size_bytes": 1090508,
+      "sha256": "d956482a3e3c4252ee457263ad99e6db704c6963cda65ac3314cbb067963a5ac",
       "row_count": 5041,
       "column_count": 13,
       "min_date": "2006-06-13",
@@ -64,8 +64,8 @@
     {
       "relative_path": "processed/combined_macro_market.csv",
       "exists": true,
-      "size_bytes": 1589433,
-      "sha256": "12d68d31a7c983ca22193444482f0f14c52e7bd7071f2289adaa2d09c9619a07",
+      "size_bytes": 1589469,
+      "sha256": "83d95c6cb8384449fc83a0ebdcb6cf00ed9e637e266deed6f9cba076c9161a54",
       "row_count": 5126,
       "column_count": 34,
       "min_date": "2006-06-13",
@@ -74,8 +74,8 @@
     {
       "relative_path": "processed/latest_macro_snapshot.csv",
       "exists": true,
-      "size_bytes": 1831,
-      "sha256": "cf4af3823afee5e43ab980760896a6a4c570c521c98c115cb077c996c52ad794",
+      "size_bytes": 1832,
+      "sha256": "a6b5d8e119fc418a2a85cda25d34988be2a6640c8fbcb394e8a3dfbf4af67b54",
       "row_count": 33,
       "column_count": 6
     },
@@ -90,8 +90,8 @@
     {
       "relative_path": "meta/source_metadata.csv",
       "exists": true,
-      "size_bytes": 17274,
-      "sha256": "6b7cbc5f98c24f83be118098c06e07cf7f535ff50b72aa4db7e28e530408f518",
+      "size_bytes": 17278,
+      "sha256": "1b16a42cfbe0b0a5220d826f45caa760bad3221939fbfc5be6704cc9a72622b1",
       "row_count": 33,
       "column_count": 13
     },
@@ -99,15 +99,15 @@
       "relative_path": "meta/data_quality_summary.csv",
       "exists": true,
       "size_bytes": 968,
-      "sha256": "ce5d5174737d8ab0a8a111f5b9ec8406706d2c99b06e3320d60c54530a79b39f",
+      "sha256": "315047ea95bbf2d22c1b02e981c0be537ea911a21c7eb1033d2a3a97bc819253",
       "row_count": 10,
       "column_count": 6
     },
     {
       "relative_path": "meta/data_quality_indicator_report.csv",
       "exists": true,
-      "size_bytes": 7572,
-      "sha256": "ac43bcdbcd0beea85e6d595a31811f70c10219a2e0161150c4ad763301d9be9f",
+      "size_bytes": 7546,
+      "sha256": "fadb4d0e46ee5ef38770d042b9e76e4804ba2c7bde2df79e5db4bb795fa52fc0",
       "row_count": 33,
       "column_count": 24
     },
@@ -115,25 +115,25 @@
       "relative_path": "meta/data_quality_alerts.csv",
       "exists": true,
       "size_bytes": 559,
-      "sha256": "35a3bfb367972fba2e3662092457ff230bd8e389e639152ccabe1df68a60fc27",
+      "sha256": "4f11bee8dfcd9bea4a0eec95878a21d3ee65b4f7f3ab77bb9b2de65ca6825ef7",
       "row_count": 3,
       "column_count": 7
     },
     {
       "relative_path": "meta/research_availability_contract.csv",
       "exists": true,
-      "size_bytes": 18973,
-      "sha256": "d8fef13a06458ec8e449300f1a5d2e228630b4ab09481e0eb87eae0ae31e0ed8",
+      "size_bytes": 26475,
+      "sha256": "455a4b64547fa82f90a3e2222ba4a2e438f08b201ae90f06c5444a5f47e4b4f9",
       "row_count": 33,
-      "column_count": 16
+      "column_count": 25
     },
     {
       "relative_path": "meta/research_module_readiness.csv",
       "exists": true,
-      "size_bytes": 1076,
-      "sha256": "6efbe65132a6e44e3e300f69520e6920e026af0bcebee198276a235574babe51",
+      "size_bytes": 2248,
+      "sha256": "e0f0bcb3b4ca1073fa012d202a285bdd1cbbe3a90c1b26af0697f4229a064890",
       "row_count": 7,
-      "column_count": 11
+      "column_count": 18
     }
   ],
   "interpretation": "Hashes identify the exact stable data inputs and the machine-readable research-availability contract. This manifest is provenance metadata only and must not be interpreted as a market signal or action."
