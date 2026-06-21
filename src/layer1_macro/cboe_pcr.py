@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 import re
 import time
 from dataclasses import dataclass
@@ -25,7 +26,7 @@ from pandas.tseries.holiday import (
 )
 from pandas.tseries.offsets import CustomBusinessDay
 
-from src.layer1_macro.io_utils import safe_write_csv
+from src.layer1_macro.io_utils import safe_write_csv, safe_write_text
 from src.layer1_macro.paths import (
     ensure_data_dirs,
     RAW_DIR,
@@ -188,6 +189,8 @@ CBOE_VOLUME_CACHE_PATH = RAW_DIR / "cboe_pcr_volume_cache.csv"
 CBOE_VALIDATION_CACHE_PATH = META_DIR / "cboe_pcr_validation_cache.csv"
 CBOE_STATUS_LATEST_RUN_PATH = META_DIR / "cboe_pcr_status_latest_run.csv"
 CBOE_VALIDATION_LATEST_RUN_PATH = META_DIR / "cboe_pcr_validation_latest_run.csv"
+CBOE_LAST_RUN_AUDIT_PATH = META_DIR / "cboe_pcr_last_run_audit.json"
+CBOE_LAST_SUCCESSFUL_ACQUISITION_PATH = META_DIR / "cboe_pcr_last_successful_acquisition.json"
 CBOE_MISSING_REPORT_PATH = META_DIR / "cboe_pcr_missing_value_report.csv"
 CBOE_DICTIONARY_PATH = META_DIR / "cboe_pcr_dictionary.csv"
 CBOE_LATEST_SNAPSHOT_PATH = PROCESSED_DIR / "cboe_pcr_latest_snapshot.csv"
@@ -235,6 +238,7 @@ class CboePcrUpdater:
         self.pcr_cache = pd.DataFrame(columns=PCR_COLS)
         self.volume_cache = pd.DataFrame(columns=VOLUME_COLS)
         self.validation_cache = pd.DataFrame(columns=VALIDATION_COLS)
+        self.run_context: dict[str, object] = {}
 
     # ------------------------------------------------------------------
     # Basic helpers
@@ -451,18 +455,169 @@ class CboePcrUpdater:
                 ].copy()
             self.validation_cache = self.validation_cache.reindex(columns=VALIDATION_COLS)
 
+    def _latest_fully_validated_cache_date(self) -> str:
+        """Return the latest cache date that still passes the full Cboe validation gate."""
+        valid_dates = [
+            pd.Timestamp(value).normalize()
+            for value in self.pcr_cache.index
+            if self.row_is_fully_validated(
+                self.pcr_cache,
+                self.volume_cache,
+                self.validation_cache,
+                pd.Timestamp(value),
+            )
+        ]
+        return self.fmt_date(max(valid_dates)) if valid_dates else ""
+
+    def _write_run_audit_records(self) -> None:
+        """Persist every Cboe run and preserve the last successful remote evidence.
+
+        An auto run with zero selected dates is an operationally valid outcome. It
+        must be recorded explicitly instead of being indistinguishable from a run
+        that never occurred.
+        """
+        run_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        latest_validated_cache_date = self._latest_fully_validated_cache_date()
+        selected_count = int(self.run_context.get("selected_date_count", len(self.status_rows)))
+        target_count = int(self.run_context.get("target_date_count", 0))
+        remote_mode = str(self.run_context.get("remote_update_mode", self.config.remote_update_mode))
+
+        if selected_count == 0 and remote_mode == "auto":
+            run_outcome = "NO_REMOTE_DATES_REQUIRED"
+        elif remote_mode == "off":
+            run_outcome = "REMOTE_DISABLED"
+        elif self.status_rows:
+            run_outcome = "REMOTE_DATES_PROCESSED"
+        else:
+            run_outcome = "NO_REMOTE_DATES_SELECTED"
+
+        last_run_payload = {
+            "schema_version": 1,
+            "record_type": "CBOE_RUN_AUDIT",
+            "run_time_local": run_time,
+            "remote_update_mode": remote_mode,
+            "target_start_date": str(self.run_context.get("target_start_date", "")),
+            "target_end_date": str(self.run_context.get("target_end_date", "")),
+            "target_date_count": target_count,
+            "selected_date_count": selected_count,
+            "remote_processed_count": int(self.remote_processed_count),
+            "status_row_count": int(len(self.status_rows)),
+            "run_outcome": run_outcome,
+            "latest_fully_validated_cache_date": latest_validated_cache_date,
+            "interpretation": (
+                "This audit describes the latest Cboe updater run. "
+                "NO_REMOTE_DATES_REQUIRED means the updater ran and found no "
+                "unvalidated target dates; it is not a failed or skipped execution."
+            ),
+        }
+        safe_write_text(
+            json.dumps(last_run_payload, ensure_ascii=False, indent=2) + "\n",
+            CBOE_LAST_RUN_AUDIT_PATH,
+            announce=False,
+        )
+
+        status_df = pd.DataFrame(self.status_rows).reindex(columns=STATUS_COLS)
+        if not status_df.empty:
+            successful = status_df.loc[
+                status_df["状态"].astype(str).str.startswith("成功", na=False)
+            ].copy()
+        else:
+            successful = pd.DataFrame(columns=STATUS_COLS)
+
+        if not successful.empty:
+            successful["date"] = pd.to_datetime(successful["date"], errors="coerce")
+            successful = successful.dropna(subset=["date"]).sort_values("date")
+            latest_success = successful.iloc[-1].to_dict()
+            latest_success["date"] = self.fmt_date(latest_success["date"])
+            success_payload = {
+                "schema_version": 1,
+                "record_type": "LAST_SUCCESSFUL_REMOTE_ACQUISITION",
+                "recorded_at_local": run_time,
+                "latest_successful_remote_date": latest_success["date"],
+                "latest_fully_validated_cache_date": latest_validated_cache_date,
+                "remote_update_mode": remote_mode,
+                "status": str(latest_success.get("状态", "")),
+                "request_url": str(latest_success.get("请求URL", "")),
+                "final_url": str(latest_success.get("最终URL", "")),
+                "run_time": str(latest_success.get("运行时间", run_time)),
+                "interpretation": (
+                    "This record is updated only when the current run has at least "
+                    "one successful remote Cboe acquisition. The cache date remains "
+                    "separately reported because an auto run may validly have no new dates."
+                ),
+            }
+            safe_write_text(
+                json.dumps(success_payload, ensure_ascii=False, indent=2) + "\n",
+                CBOE_LAST_SUCCESSFUL_ACQUISITION_PATH,
+                announce=False,
+            )
+        elif not CBOE_LAST_SUCCESSFUL_ACQUISITION_PATH.exists():
+            inferred_payload = {
+                "schema_version": 1,
+                "record_type": "LAST_SUCCESSFUL_REMOTE_ACQUISITION",
+                "recorded_at_local": run_time,
+                "latest_successful_remote_date": "",
+                "latest_fully_validated_cache_date": latest_validated_cache_date,
+                "remote_update_mode": remote_mode,
+                "status": "NO_NEW_SUCCESS_EVIDENCE_IN_CURRENT_RUN",
+                "interpretation": (
+                    "No successful remote Cboe acquisition occurred in this run. "
+                    "The latest fully validated cache date is reported, but its original "
+                    "remote-acquisition timestamp is not inferred from cache contents."
+                ),
+            }
+            safe_write_text(
+                json.dumps(inferred_payload, ensure_ascii=False, indent=2) + "\n",
+                CBOE_LAST_SUCCESSFUL_ACQUISITION_PATH,
+                announce=False,
+            )
+
     def save_caches_and_latest_run(self) -> None:
         self._save_date_index_csv(self.pcr_cache, CBOE_PCR_CACHE_PATH, PCR_COLS)
         self._save_date_index_csv(self.volume_cache, CBOE_VOLUME_CACHE_PATH, VOLUME_COLS)
         self._save_validation_cache(self.validation_cache, CBOE_VALIDATION_CACHE_PATH)
 
         status_df = pd.DataFrame(self.status_rows).reindex(columns=STATUS_COLS)
+        if status_df.empty:
+            remote_mode = str(self.run_context.get("remote_update_mode", self.config.remote_update_mode))
+            selected_count = int(self.run_context.get("selected_date_count", 0))
+            if remote_mode == "off":
+                summary_status = "本轮未请求远程_仅刷新报告"
+                summary_note = "remote_update_mode='off'；本轮明确未请求 Cboe 远程数据。"
+            elif selected_count == 0:
+                summary_status = "本轮无需远程更新_所有目标日期已有效验证"
+                summary_note = "自动模式已运行；没有发现需要远程补取或重验的目标日期。"
+            else:
+                summary_status = "本轮无远程处理记录"
+                summary_note = "请检查 cboe_pcr_last_run_audit.json 以确定本轮的精确运行结果。"
+
+            status_df = pd.DataFrame([{
+                "date": str(self.run_context.get("target_end_date", "")),
+                "状态": summary_status,
+                "数据来源类型": "run_summary",
+                "请求URL": "",
+                "最终URL": "",
+                "解析方法": "",
+                "PCR目标数量": "",
+                "PCR核心目标数量": "",
+                "PCR解析数量": "",
+                "PCR核心解析数量": "",
+                "成交量分区解析数量": "",
+                "验证通过数量": "",
+                "验证部分通过数量": "",
+                "验证失败数量": "",
+                "HTML快照": "",
+                "备注": summary_note,
+                "运行时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            }]).reindex(columns=STATUS_COLS)
         CBOE_STATUS_LATEST_RUN_PATH.parent.mkdir(parents=True, exist_ok=True)
         safe_write_csv(status_df, CBOE_STATUS_LATEST_RUN_PATH, announce=False)
 
         latest_validation_df = pd.DataFrame(self.latest_validation_rows).reindex(columns=VALIDATION_COLS)
         CBOE_VALIDATION_LATEST_RUN_PATH.parent.mkdir(parents=True, exist_ok=True)
         safe_write_csv(latest_validation_df, CBOE_VALIDATION_LATEST_RUN_PATH, announce=False)
+
+        self._write_run_audit_records()
 
     @staticmethod
     def merge_cache_by_index(base_df: pd.DataFrame, new_df: pd.DataFrame, expected_cols: list[str]) -> pd.DataFrame:
@@ -1141,6 +1296,8 @@ class CboePcrUpdater:
             "验证缓存": CBOE_VALIDATION_CACHE_PATH,
             "本轮状态": CBOE_STATUS_LATEST_RUN_PATH,
             "本轮验证": CBOE_VALIDATION_LATEST_RUN_PATH,
+            "本轮运行审计": CBOE_LAST_RUN_AUDIT_PATH,
+            "最近成功采集": CBOE_LAST_SUCCESSFUL_ACQUISITION_PATH,
             "缺失值统计": CBOE_MISSING_REPORT_PATH,
             "最新快照": CBOE_LATEST_SNAPSHOT_PATH,
             "年度覆盖率": CBOE_YEARLY_COVERAGE_PATH,
@@ -1277,6 +1434,14 @@ class CboePcrUpdater:
         else:
             date_list = self.select_dates_for_this_run(all_target_dates)
             print(f"[模式] auto，本轮远程待处理：{len(date_list)} 日期")
+
+        self.run_context = {
+            "remote_update_mode": self.config.remote_update_mode,
+            "target_start_date": self.fmt_date(start),
+            "target_end_date": self.fmt_date(end),
+            "target_date_count": len(all_target_dates),
+            "selected_date_count": len(date_list),
+        }
 
         for n, dt in enumerate(date_list, start=1):
             self.process_one_date(dt, n=n, total=len(date_list))

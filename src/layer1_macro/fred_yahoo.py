@@ -112,10 +112,36 @@ FRED_SPECS: list[IndicatorSpec] = [
     IndicatorSpec("FRED", "DGS10", "美国10Y收益率", "宏观/市场指标"),
     IndicatorSpec("FRED", "DFII10", "美国10Y实际利率", "宏观/市场指标"),
     IndicatorSpec("FRED", "T10YIE", "10Y通胀预期", "宏观/市场指标"),
-    IndicatorSpec("FRED", "DTWEXBGS", "广义美元指数", "宏观/市场指标"),
-    IndicatorSpec("FRED", "DEXCHUS", "USD_CNY", "宏观/市场指标"),
-    IndicatorSpec("FRED", "DEXUSEU", "EUR_USD", "宏观/市场指标"),
-    IndicatorSpec("FRED", "DEXJPUS", "JPY_USD", "宏观/市场指标"),
+    # FRED FX series can arrive with visible publication lags. Keep the
+    # source-metadata freshness budget aligned with the Stage13 quality policy.
+    IndicatorSpec(
+        "FRED",
+        "DTWEXBGS",
+        "广义美元指数",
+        "宏观/市场指标",
+        maximum_expected_tail_delay_calendar_days=10,
+    ),
+    IndicatorSpec(
+        "FRED",
+        "DEXCHUS",
+        "USD_CNY",
+        "宏观/市场指标",
+        maximum_expected_tail_delay_calendar_days=10,
+    ),
+    IndicatorSpec(
+        "FRED",
+        "DEXUSEU",
+        "EUR_USD",
+        "宏观/市场指标",
+        maximum_expected_tail_delay_calendar_days=10,
+    ),
+    IndicatorSpec(
+        "FRED",
+        "DEXJPUS",
+        "JPY_USD",
+        "宏观/市场指标",
+        maximum_expected_tail_delay_calendar_days=10,
+    ),
     IndicatorSpec("FRED", "DCOILWTICO", "WTI原油", "宏观/市场指标"),
     IndicatorSpec(
         "FRED",
@@ -350,24 +376,76 @@ def _status_row(
     remote_rows: int,
     status: str,
     note: str = "",
+    remote_df: pd.DataFrame | None = None,
+    target_end_date: str | None = None,
 ) -> dict[str, object]:
+    """Build one transparent acquisition-status record.
+
+    ``状态`` is retained for backward compatibility. The additional fields separate:
+    (1) whether the remote request produced values, (2) whether the cache tail
+    actually advanced, and (3) the calendar gap to this run's target date.
+    A successful request is not automatically treated as a fresh tail.
+    """
+    before_latest = _latest_valid_date(before_df, spec.name)
+    after_latest = _latest_valid_date(after_df, spec.name)
+    remote_latest = _latest_valid_date(remote_df, spec.name) if remote_df is not None else None
+
+    before_ts = pd.to_datetime(before_latest, errors="coerce")
+    after_ts = pd.to_datetime(after_latest, errors="coerce")
+    tail_advanced = bool(
+        pd.notna(after_ts)
+        and (pd.isna(before_ts) or after_ts > before_ts)
+    )
+
+    if not attempted:
+        remote_response_status = "REMOTE_SKIPPED"
+        tail_update_status = "REMOTE_SKIPPED_CACHE_ONLY"
+    elif status == "远程更新成功":
+        remote_response_status = "REMOTE_OK"
+        tail_update_status = (
+            "REMOTE_OK_TAIL_ADVANCED"
+            if tail_advanced
+            else "REMOTE_OK_TAIL_UNCHANGED"
+        )
+    elif status == "远程返回空_使用本地缓存":
+        remote_response_status = "REMOTE_EMPTY"
+        tail_update_status = "REMOTE_EMPTY_USED_CACHE"
+    elif status == "远程更新失败_使用本地缓存":
+        remote_response_status = "REMOTE_ERROR"
+        tail_update_status = "REMOTE_ERROR_USED_CACHE"
+    else:
+        remote_response_status = "REMOTE_UNKNOWN"
+        tail_update_status = "REMOTE_UNKNOWN"
+
+    target_ts = pd.to_datetime(target_end_date, errors="coerce")
+    tail_gap_days = (
+        int((target_ts.normalize() - after_ts.normalize()).days)
+        if pd.notna(target_ts) and pd.notna(after_ts)
+        else pd.NA
+    )
+
     return {
         "数据源": spec.source,
         "代码": spec.code,
         "指标名称": spec.name,
         "缓存文件": str(cache_file),
         "本地更新前有效行数": _count_non_null(before_df, spec.name),
-        "本地更新前最新日期": _latest_valid_date(before_df, spec.name),
+        "本地更新前最新日期": before_latest,
         "是否尝试远程更新": "是" if attempted else "否",
         "远程请求起始日期": request_start,
+        "目标结束日期": target_end_date,
         "远程返回有效行数": remote_rows,
-        "状态": status,
+        "远程响应状态": remote_response_status,
+        "远程最新有效日期": remote_latest,
+        "尾部推进状态": tail_update_status,
+        "尾部是否推进": "是" if tail_advanced else "否",
         "本地更新后有效行数": _count_non_null(after_df, spec.name),
-        "本地更新后最新日期": _latest_valid_date(after_df, spec.name),
+        "本地更新后最新日期": after_latest,
+        "本地更新后距目标日期自然日数": tail_gap_days,
+        "状态": status,
         "备注": note,
         "运行时间": _run_time_str(),
     }
-
 
 # -----------------------------------------------------------------------------
 # FRED fetching
@@ -470,6 +548,7 @@ def update_fred_cache(
                 request_start=None,
                 remote_rows=0,
                 status="跳过远程_mode_off",
+                target_end_date=end_date,
             ))
         return cache, status_rows
 
@@ -488,6 +567,7 @@ def update_fred_cache(
         )
         print(f"[FRED {idx}/{len(FRED_SPECS)}] {spec.code} -> {spec.name}; 请求区间：{request_start} 至 {end_date}")
         spec_before = cache.copy()
+        update = pd.DataFrame(columns=["date", spec.name])
         try:
             update = fetch_fred_series(spec, request_start, end_date)
             remote_rows = int(update[spec.name].notna().sum()) if spec.name in update.columns else 0
@@ -516,6 +596,8 @@ def update_fred_cache(
             remote_rows=remote_rows,
             status=status,
             note=note,
+            remote_df=update,
+            target_end_date=end_date,
         ))
         if sleep_seconds > 0:
             time.sleep(sleep_seconds)
@@ -608,6 +690,7 @@ def update_yahoo_cache(
                 request_start=None,
                 remote_rows=0,
                 status="跳过远程_mode_off",
+                target_end_date=end_date,
             ))
         return cache, status_rows
 
@@ -626,6 +709,7 @@ def update_yahoo_cache(
         )
         print(f"[Yahoo {idx}/{len(YAHOO_SPECS)}] {spec.code} -> {spec.name}; 请求区间：{request_start} 至 {end_date}")
         spec_before = cache.copy()
+        update = pd.DataFrame(columns=["date", spec.name])
         try:
             update = fetch_yahoo_series(spec, request_start, end_date)
             remote_rows = int(update[spec.name].notna().sum()) if spec.name in update.columns else 0
@@ -654,6 +738,8 @@ def update_yahoo_cache(
             remote_rows=remote_rows,
             status=status,
             note=note,
+            remote_df=update,
+            target_end_date=end_date,
         ))
         if sleep_seconds > 0:
             time.sleep(sleep_seconds)
@@ -809,6 +895,7 @@ def update_fred_yahoo(
                 request_start=None,
                 remote_rows=0,
                 status="跳过_remote_yahoo_only",
+                target_end_date=end_date,
             ))
     if fred_only:
         for spec in YAHOO_SPECS:
@@ -821,6 +908,7 @@ def update_fred_yahoo(
                 request_start=None,
                 remote_rows=0,
                 status="跳过_remote_fred_only",
+                target_end_date=end_date,
             ))
 
     write_fred_yahoo_outputs(
