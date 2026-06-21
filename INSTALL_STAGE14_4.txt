@@ -1,0 +1,59 @@
+Stage14.4 安装说明（Windows，Layer1MacroData）
+
+本补丁只用于 Layer1MacroData。请在能正常下载 yfinance 的数据生产电脑上安装。
+
+一、安装文件
+1. 解压本压缩包。
+2. 打开解压后的 Stage14_4_Prospective_Readiness_Patch 文件夹。
+3. 将其中的 src、scripts、docs 三个文件夹复制到：
+   D:\Investment\Layer1MacroData
+4. Windows 提示“目标文件夹已包含同名文件”时，选择“替换目标中的文件”。
+
+二、运行前检查
+打开 PowerShell：
+
+cd D:\Investment\Layer1MacroData
+.\.venv\Scripts\Activate.ps1
+python -m compileall src\layer1_macro\fred_yahoo.py src\layer1_macro\research_availability.py src\layer1_macro\cboe_pcr.py scripts\check_research_availability_contract.py
+
+没有红色报错才继续。
+
+三、完整在线刷新
+python scripts/run_data_update.py --fred-yahoo-mode auto --cboe-mode auto --skip-commit-check
+
+四、验收
+python scripts/check_research_availability_contract.py
+python scripts/check_data_release_ready.py
+
+需要同时出现：
+RESULT: PASS
+RESULT: READY_TO_PUBLISH
+
+五、查看新状态
+Import-Csv data\meta\data_status.csv |
+  Select-Object 数据源,代码,指标名称,远程响应状态,远程最新有效日期,尾部推进状态,尾部是否推进,本地更新后最新日期,本地更新后距目标日期自然日数 |
+  Format-Table -AutoSize
+
+Import-Csv data\meta\research_module_readiness.csv |
+  Select-Object module,module_prospective_state_status,module_research_readiness,non_ready_indicators |
+  Format-Table -AutoSize
+
+Get-Content data\meta\cboe_pcr_last_run_audit.json
+Get-Content data\meta\cboe_pcr_last_successful_acquisition.json
+
+六、Git 提交
+git add src scripts docs data
+git commit -m "Stage14.4 add prospective readiness and acquisition audit"
+git push
+
+七、研究电脑验证
+在研究电脑的 Layer1MacroData 目录运行：
+git pull
+.\.venv\Scripts\Activate.ps1
+python scripts/check_research_availability_contract.py
+python scripts/check_data_release_ready.py
+
+注意：
+- 保留质量 WARN 不等于不能发布；只要 RELEASE READY 通过，可以发布。
+- VIX 期限结构若仍过期，会显示为 PROSPECTIVE_STATE_STALE / DEGRADED。这是正确的风险治理结果，不要手工补数或强行改为 READY。
+- .env 当前被 Git 跟踪的问题按既有约定暂不处理，因此运行命令保留 --skip-commit-check。
