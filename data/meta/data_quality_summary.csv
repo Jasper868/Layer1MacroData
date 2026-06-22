@@ -1,11 +1,11 @@
 ﻿generated_at,scope,metric,value,status,message
-2026-06-21 11:49:02,overall,overall_status,WARN,WARN,"结构状态统计：OK=9, WARN=0, FAIL=0；指标状态统计：OK=30, WARN=3, FAIL=0。"
-2026-06-21 11:49:02,dataset,row_count,5126,OK,主表行数。
-2026-06-21 11:49:02,dataset,indicator_count,33,OK,主表指标列数量，不含 date。
-2026-06-21 11:49:02,dataset,min_date,2006-06-13,OK,主表最早日期。
-2026-06-21 11:49:02,dataset,max_date,2026-06-19,OK,主表最新日期。
-2026-06-21 11:49:02,dataset,invalid_date_count,0,OK,无法解析的 date 数量。
-2026-06-21 11:49:02,dataset,duplicate_date_count,0,OK,重复 date 行数量。
-2026-06-21 11:49:02,dataset,date_only_row_count,0,OK,只有 date、全部指标为空的伪日期行数量。
-2026-06-21 11:49:02,dataset,missing_expected_indicator_count,0,OK,指标字典中的指标均已进入主表。
-2026-06-21 11:49:02,dataset,extra_indicator_count,0,OK,主表没有发现字典外指标。
+2026-06-22 23:30:26,overall,overall_status,OK,OK,"结构状态统计：OK=9, WARN=0, FAIL=0；指标状态统计：OK=33, WARN=0, FAIL=0。"
+2026-06-22 23:30:25,dataset,row_count,5127,OK,主表行数。
+2026-06-22 23:30:25,dataset,indicator_count,33,OK,主表指标列数量，不含 date。
+2026-06-22 23:30:25,dataset,min_date,2006-06-13,OK,主表最早日期。
+2026-06-22 23:30:25,dataset,max_date,2026-06-22,OK,主表最新日期。
+2026-06-22 23:30:25,dataset,invalid_date_count,0,OK,无法解析的 date 数量。
+2026-06-22 23:30:25,dataset,duplicate_date_count,0,OK,重复 date 行数量。
+2026-06-22 23:30:25,dataset,date_only_row_count,0,OK,只有 date、全部指标为空的伪日期行数量。
+2026-06-22 23:30:25,dataset,missing_expected_indicator_count,0,OK,指标字典中的指标均已进入主表。
+2026-06-22 23:30:25,dataset,extra_indicator_count,0,OK,主表没有发现字典外指标。

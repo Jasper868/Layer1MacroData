@@ -1,7 +1,7 @@
 ﻿数据源,研究口径,有效起点,指标名称,PCR列名,网页原始名称,最新有效日期,最新有效值,距离今天自然日数,是否核心字段,是否建议纳入,daily_page_url
-Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,Total PCR,CBOE_Total_PCR,TOTAL PUT/CALL RATIO,2026-06-18,0.91,3,是,观察,https://www.cboe.com/markets/us/options/market-statistics/daily/
-Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,Index PCR,CBOE_Index_PCR,INDEX PUT/CALL RATIO,2026-06-18,1.17,3,是,建议研究,https://www.cboe.com/markets/us/options/market-statistics/daily/
-Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,ETP PCR,CBOE_ETP_PCR,EXCHANGE TRADED PRODUCTS PUT/CALL RATIO,2026-06-18,1.1,3,是,建议研究,https://www.cboe.com/markets/us/options/market-statistics/daily/
-Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,Equity PCR,CBOE_Equity_PCR,EQUITY PUT/CALL RATIO,2026-06-18,0.58,3,是,观察,https://www.cboe.com/markets/us/options/market-statistics/daily/
-Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,VIX PCR,CBOE_VIX_PCR,CBOE VOLATILITY INDEX (VIX) PUT/CALL RATIO,2026-06-18,0.2,3,是,高级观察,https://www.cboe.com/markets/us/options/market-statistics/daily/
-Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,SPX PCR,CBOE_SPX_PCR,SPX + SPXW PUT/CALL RATIO,2026-06-18,1.32,3,是,建议研究,https://www.cboe.com/markets/us/options/market-statistics/daily/
+Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,Total PCR,CBOE_Total_PCR,TOTAL PUT/CALL RATIO,2026-06-18,0.91,4,是,观察,https://www.cboe.com/markets/us/options/market-statistics/daily/
+Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,Index PCR,CBOE_Index_PCR,INDEX PUT/CALL RATIO,2026-06-18,1.17,4,是,建议研究,https://www.cboe.com/markets/us/options/market-statistics/daily/
+Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,ETP PCR,CBOE_ETP_PCR,EXCHANGE TRADED PRODUCTS PUT/CALL RATIO,2026-06-18,1.1,4,是,建议研究,https://www.cboe.com/markets/us/options/market-statistics/daily/
+Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,Equity PCR,CBOE_Equity_PCR,EQUITY PUT/CALL RATIO,2026-06-18,0.58,4,是,观察,https://www.cboe.com/markets/us/options/market-statistics/daily/
+Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,VIX PCR,CBOE_VIX_PCR,CBOE VOLATILITY INDEX (VIX) PUT/CALL RATIO,2026-06-18,0.2,4,是,高级观察,https://www.cboe.com/markets/us/options/market-statistics/daily/
+Cboe Daily Market Statistics,Post-2019 daily page only,2019-10-07,SPX PCR,CBOE_SPX_PCR,SPX + SPXW PUT/CALL RATIO,2026-06-18,1.32,4,是,建议研究,https://www.cboe.com/markets/us/options/market-statistics/daily/

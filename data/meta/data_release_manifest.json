@@ -1,35 +1,35 @@
 {
   "manifest_schema_version": 2,
-  "generated_at_utc": "2026-06-21T03:49:04+00:00",
+  "generated_at_utc": "2026-06-22T15:30:30+00:00",
   "release_scope": "Layer1MacroData stable Data-to-Research handoff",
   "combined_macro_market": {
     "relative_path": "processed/combined_macro_market.csv",
-    "row_count": 5126,
+    "row_count": 5127,
     "column_count": 34,
     "start_date": "2006-06-13",
-    "end_date": "2026-06-19"
+    "end_date": "2026-06-22"
   },
-  "overall_data_quality_status": "WARN",
+  "overall_data_quality_status": "OK",
   "files": [
     {
       "relative_path": "raw/fred_cache.csv",
       "exists": true,
-      "size_bytes": 483117,
-      "sha256": "6c76dd25db0bed30e4d0d6e7cf5d22c75feda8e7465a20303839f6fc9bbf87b3",
-      "row_count": 5125,
+      "size_bytes": 483167,
+      "sha256": "fca4f64e17c940f14f5b2f1baff74c319704036153c9e4bba7dd48542cd9886a",
+      "row_count": 5126,
       "column_count": 16,
       "min_date": "2006-06-13",
-      "max_date": "2026-06-18"
+      "max_date": "2026-06-19"
     },
     {
       "relative_path": "raw/yahoo_cache.csv",
       "exists": true,
-      "size_bytes": 1090508,
-      "sha256": "d956482a3e3c4252ee457263ad99e6db704c6963cda65ac3314cbb067963a5ac",
-      "row_count": 5041,
+      "size_bytes": 1090904,
+      "sha256": "fd802a0f87383113c62ca14149ac964e8e37a04b8df3fafc58d44faf634fcb5d",
+      "row_count": 5042,
       "column_count": 13,
       "min_date": "2006-06-13",
-      "max_date": "2026-06-19"
+      "max_date": "2026-06-22"
     },
     {
       "relative_path": "raw/cboe_pcr_cache.csv",
@@ -64,18 +64,18 @@
     {
       "relative_path": "processed/combined_macro_market.csv",
       "exists": true,
-      "size_bytes": 1589469,
-      "sha256": "83d95c6cb8384449fc83a0ebdcb6cf00ed9e637e266deed6f9cba076c9161a54",
-      "row_count": 5126,
+      "size_bytes": 1589908,
+      "sha256": "c447f6c3cd7c8bb90ec61ed7f30e12de96d351d811ae25a514c97ae2f08d580c",
+      "row_count": 5127,
       "column_count": 34,
       "min_date": "2006-06-13",
-      "max_date": "2026-06-19"
+      "max_date": "2026-06-22"
     },
     {
       "relative_path": "processed/latest_macro_snapshot.csv",
       "exists": true,
-      "size_bytes": 1832,
-      "sha256": "a6b5d8e119fc418a2a85cda25d34988be2a6640c8fbcb394e8a3dfbf4af67b54",
+      "size_bytes": 1829,
+      "sha256": "b28cf510aaea3a6d2525d5a163a469abe78735fea30a22dfce702f149270387c",
       "row_count": 33,
       "column_count": 6
     },
@@ -83,7 +83,7 @@
       "relative_path": "processed/cboe_pcr_latest_snapshot.csv",
       "exists": true,
       "size_bytes": 1489,
-      "sha256": "e11a117f6af2eee8a952d770ab7ff521e173ac46d2fde333f8f207ed6b0b4d09",
+      "sha256": "1922f9828e6ae4b8d9a911fcbec43af787b2c08ab918b6c29f79773e1bfa1ad7",
       "row_count": 6,
       "column_count": 12
     },
@@ -98,40 +98,40 @@
     {
       "relative_path": "meta/data_quality_summary.csv",
       "exists": true,
-      "size_bytes": 968,
-      "sha256": "315047ea95bbf2d22c1b02e981c0be537ea911a21c7eb1033d2a3a97bc819253",
+      "size_bytes": 964,
+      "sha256": "0c5f5d6ca498c2bda555f0875e9d4225ae3ae7f169fcf86d81fe45a161a1615d",
       "row_count": 10,
       "column_count": 6
     },
     {
       "relative_path": "meta/data_quality_indicator_report.csv",
       "exists": true,
-      "size_bytes": 7546,
-      "sha256": "fadb4d0e46ee5ef38770d042b9e76e4804ba2c7bde2df79e5db4bb795fa52fc0",
+      "size_bytes": 7655,
+      "sha256": "00c37462f68d2552754c53df5e78000d31982c8b8b254207c178856a0b8b2a7e",
       "row_count": 33,
       "column_count": 24
     },
     {
       "relative_path": "meta/data_quality_alerts.csv",
       "exists": true,
-      "size_bytes": 559,
-      "sha256": "4f11bee8dfcd9bea4a0eec95878a21d3ee65b4f7f3ab77bb9b2de65ca6825ef7",
-      "row_count": 3,
+      "size_bytes": 67,
+      "sha256": "b45939eda025b3b92e60d67804fcdebed0dac8781fd1623a0101e379d21bc10b",
+      "row_count": 0,
       "column_count": 7
     },
     {
       "relative_path": "meta/research_availability_contract.csv",
       "exists": true,
-      "size_bytes": 26475,
-      "sha256": "455a4b64547fa82f90a3e2222ba4a2e438f08b201ae90f06c5444a5f47e4b4f9",
+      "size_bytes": 26569,
+      "sha256": "b538f3727a906fa158dd98527d5c65f6bcaaa5172ba330ac6fdadf62c8daf777",
       "row_count": 33,
       "column_count": 25
     },
     {
       "relative_path": "meta/research_module_readiness.csv",
       "exists": true,
-      "size_bytes": 2248,
-      "sha256": "e0f0bcb3b4ca1073fa012d202a285bdd1cbbe3a90c1b26af0697f4229a064890",
+      "size_bytes": 2461,
+      "sha256": "7b3cb631fdff0c9f8c1a1ec6d2e9e13c85c89ce3ea376cd8ebf78b4cb2554468",
       "row_count": 7,
       "column_count": 18
     }
