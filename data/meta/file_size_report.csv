@@ -1,6 +1,6 @@
 ﻿file_name,path,exists,size_mib
-fred_cache,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,True,0.4608
-yahoo_cache,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,True,1.0404
+fred_cache,D:\Investment\Layer1MacroData\data\raw\fred_cache.csv,True,0.4612
+yahoo_cache,D:\Investment\Layer1MacroData\data\raw\yahoo_cache.csv,True,1.0409
 indicator_dictionary,D:\Investment\Layer1MacroData\data\meta\indicator_dictionary.csv,True,0.0021
 source_metadata,D:\Investment\Layer1MacroData\data\meta\source_metadata.csv,True,0.0165
 data_status,D:\Investment\Layer1MacroData\data\meta\data_status.csv,True,0.0065
