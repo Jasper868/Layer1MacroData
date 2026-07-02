@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "record_type": "LAST_SUCCESSFUL_REMOTE_ACQUISITION",
-  "recorded_at_local": "2026-06-28 12:14:43",
-  "latest_successful_remote_date": "2026-06-26",
-  "latest_fully_validated_cache_date": "2026-06-26",
+  "recorded_at_local": "2026-07-02 22:11:05",
+  "latest_successful_remote_date": "2026-07-01",
+  "latest_fully_validated_cache_date": "2026-07-01",
   "remote_update_mode": "auto",
   "status": "成功_全部验证通过",
-  "request_url": "https://www.cboe.com/markets/us/options/market-statistics/daily/?dt=2026-06-26",
-  "final_url": "https://www.cboe.com/markets/us/options/market-statistics/daily/?dt=2026-06-26",
-  "run_time": "2026-06-28 12:14:42",
+  "request_url": "https://www.cboe.com/markets/us/options/market-statistics/daily/?dt=2026-07-01",
+  "final_url": "https://www.cboe.com/markets/us/options/market-statistics/daily/?dt=2026-07-01",
+  "run_time": "2026-07-02 22:11:04",
   "interpretation": "This record is updated only when the current run has at least one successful remote Cboe acquisition. The cache date remains separately reported because an auto run may validly have no new dates."
 }
